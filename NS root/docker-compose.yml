@@ -1,0 +1,24 @@
+services:
+    ns_root:
+        build:
+            context: ..
+        image: oqs-bind
+        entrypoint:
+            - /init.bash 
+        command: ${ALG} ${FRAG_MODE} ${DEBUG}
+        volumes:
+            - ./init.bash:/init.bash
+            - ./dsset-local.:/dsset-local.
+            - ./named.conf:/usr/local/etc/named.conf
+            - ./db.root:/usr/local/etc/bind/zones/db.root
+            - ./data:/tmp/
+        ports:
+            - "3053:53/tcp"
+            - "3053:53/udp"
+        networks:
+            bind9_net:
+                ipv4_address: 172.20.0.2
+
+networks:
+    bind9_net:
+        external: true
