@@ -3,6 +3,7 @@ services:
         build:
             context: ..
         image: oqs-bind
+        tty: true
         entrypoint:
             - /init.bash 
         command: ${ALG} ${FRAG_MODE} ${DEBUG}

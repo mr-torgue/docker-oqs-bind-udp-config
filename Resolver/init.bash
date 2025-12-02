@@ -66,9 +66,9 @@ cd /tmp
 if [ "$DEBUG" = "true" ]; then
     echo "DEBUG MODE"
     tcpdump -i any -w /tmp/$ALG-resolver.pcap &
-    gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
+    #gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
 else
     named -g -d 3
 fi
-
-# dig @172.20.0.2 +timeout=10 +tries=1 test.example.local
+/bin/bash
+# dig @localhost -p 4053 +timeout=10 +tries=1 test.example.local

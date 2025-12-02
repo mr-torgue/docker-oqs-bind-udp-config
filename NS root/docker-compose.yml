@@ -3,14 +3,15 @@ services:
         build:
             context: ..
         image: oqs-bind
+        tty: true
         entrypoint:
             - /init.bash 
         command: ${ALG} ${FRAG_MODE} ${DEBUG}
         volumes:
             - ./init.bash:/init.bash
             - ./dsset-local.:/dsset-local.
-            - ./named.conf:/usr/local/etc/named.conf
-            - ./db.root:/usr/local/etc/bind/zones/db.root
+            - ./named.conf:/named.conf
+            - ./db.root:/db.root
             - ./data:/tmp/
         ports:
             - "3053:53/tcp"
