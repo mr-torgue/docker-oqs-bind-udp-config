@@ -1,5 +1,6 @@
 # Description
 Contains the docker files to set up our modified version of OQS-BIND in a docker container.
+Installation: `curl -sSL https://raw.githubusercontent.com/mr-torgue/docker-oqs-bind-udp-config/refs/heads/main/setup.sh | bash`
 
 # Limitations
 
