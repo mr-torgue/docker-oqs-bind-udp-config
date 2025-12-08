@@ -5,7 +5,7 @@ sudo apt upgrade
 # Install docker
 # Add Docker's official GPG key:
 sudo apt update
-sudo apt install ca-certificates curl
+sudo apt install ca-certificates curl uidmap
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -25,6 +25,7 @@ sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin dock
 # Clone the git repositories
 git clone https://github.com/mr-torgue/docker-oqs-bind-udp-config.git
 
-# Build the image
+# Build the image and configure docker
 docker build -t oqs-bind .
 docker network create --subnet=172.20.0.0/16 bind9_net
+dockerd-rootless-setuptool.sh install
