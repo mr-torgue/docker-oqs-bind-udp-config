@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo apt update
-sudo apt upgrade
+sudo apt upgrade -y
 
 # Install docker
 # Add Docker's official GPG key:
