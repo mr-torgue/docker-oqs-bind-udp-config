@@ -25,7 +25,7 @@ RUN git clone https://github.com/open-quantum-safe/liboqs.git --branch 0.14.0
 RUN mkdir liboqs/build
 WORKDIR liboqs/build
 RUN cmake -GNinja -DBUILD_SHARED_LIBS=ON ..
-RUN ninja
+RUN ninja -j 1
 RUN ninja install
 # Install oqs-provider 0.10.0
 WORKDIR /
