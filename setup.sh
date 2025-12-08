@@ -26,6 +26,7 @@ sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 git clone https://github.com/mr-torgue/docker-oqs-bind-udp-config.git
 
 # Build the image and configure docker
+cd docker-oqs-bind-udp-config
+dockerd-rootless-setuptool.sh install
 docker build -t oqs-bind .
 docker network create --subnet=172.20.0.0/16 bind9_net
-dockerd-rootless-setuptool.sh install
