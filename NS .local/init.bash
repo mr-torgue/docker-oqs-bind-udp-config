@@ -56,11 +56,16 @@ fi
 cat /usr/local/etc/named.conf
 ifconfig
 
+# update if available
+cd /OQS-bind
+./udpate.sh
+
+# start bind9
 cd /tmp
 if [ "$DEBUG" = "true" ]; then
     echo "DEBUG MODE"
     tcpdump -i any -w /tmp/$ALG-ns-local.pcap &
-    #gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
+    gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
 else
     named -g -d 3
 fi

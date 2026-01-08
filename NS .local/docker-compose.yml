@@ -11,7 +11,7 @@ services:
             - ./init.bash:/init.bash
             - ./dsset-example.local.:/dsset-example.local.
             - ./named.conf:/named.conf
-            - ./db.local:${DB}
+            - ./${DB}:/db.local
             - ./data:/tmp/
         ports:
             - "2053:53/tcp"

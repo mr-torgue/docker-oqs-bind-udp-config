@@ -56,6 +56,11 @@ fi
 cat /usr/local/etc/named.conf
 ifconfig  
 
+# update if available
+cd /OQS-bind
+./udpate.sh
+
+# start bind9
 cd /tmp
 if [ "$DEBUG" = "true" ]; then
     echo "DEBUG MODE"

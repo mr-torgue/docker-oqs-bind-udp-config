@@ -59,16 +59,19 @@ fi
 # print some information
 cat /usr/local/etc/named.conf
 ifconfig 
+rndc flush
+
+# update if available
+cd /OQS-bind
+./udpate.sh
 
 # start bind9
-rndc flush
 cd /tmp
 if [ "$DEBUG" = "true" ]; then
     echo "DEBUG MODE"
     tcpdump -i any -w /tmp/$ALG-resolver.pcap &
-    #gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
+    gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
 else
     named -g -d 3
 fi
 /bin/bash
-# dig @localhost -p 4053 +timeout=10 +tries=1 test.example.local
