@@ -10,7 +10,7 @@ services:
         volumes:
             - ./init.bash:/init.bash
             - ./named.conf:/named.conf
-            - ./db.example.local:/db.example.local
+            - ./db.example.local:${DB}
             - ./data:/tmp/
         ports:
             - "1053:53/tcp"

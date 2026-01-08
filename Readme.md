@@ -2,6 +2,7 @@
 Contains the docker files to set up our modified version of OQS-BIND in a docker container.
 Installation: `curl -sSL https://raw.githubusercontent.com/mr-torgue/docker-oqs-bind-udp-config/refs/heads/main/setup.sh | bash`
 
+
 # Limitations
 
 ## Manual Setup
@@ -22,4 +23,16 @@ At the moment, we assume the following set up:
 2. One TLD name server for the .local domain
 3. One authoritative name server for the .example.local domain
 4. One recursive resolver
-Changing this configuration requires some effort.
+Changing this configuration requires some effort. 
+I included two configurations: one for docker (internal) and one for amazon (external).
+However, IP addresses might change over time.
+
+# BIND9 Configuration
+BIND9 can be run with `docker compose up -d`.
+Make sure to select the right folder: resolver, ns, or root.
+BIND9 can be configured through the `.env` file:
+- ALG: Specifies the supported signature algorithms.
+- DEBUG: Specifies if BIND9 is executed in debug mode. When running in debug mode, it will capture network traffic and use GDB.
+- FRAG_MODE: Either QBF or RAW, or, if not specified, it defaults to TCP.
+- DB: Specifies the DB file to use.
+Note that there is no centralization, so make sure that all the components run in a configuration that is compatible with each other.

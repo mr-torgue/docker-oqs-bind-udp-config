@@ -15,4 +15,4 @@ ns1.root.	IN      A      172.20.0.2
 
 local.	IN	NS	ns1.local.
 
-ns1.local.	IN	A	172.20.0.3s
+ns1.local.	IN	A	172.20.0.3
