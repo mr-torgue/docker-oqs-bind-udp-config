@@ -9,13 +9,13 @@ services:
         command: ${ALG} ${FRAG_MODE} ${DEBUG}
         volumes:
             - ./init.bash:/init.bash
-            - ./dsset-local.:/dsset-local.
             - ./named.conf:/named.conf
             - ./${DB}:/db.root
             - ./data:/tmp/
+            - ./dsset-local.:/dsset-local.
         ports:
-            - "3053:53/tcp"
-            - "3053:53/udp"
+            - "2053:53/tcp"
+            - "2053:53/udp"
         networks:
             bind9_net:
                 ipv4_address: 172.20.0.2

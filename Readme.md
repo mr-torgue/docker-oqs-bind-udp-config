@@ -2,7 +2,6 @@
 Contains the docker files to set up our modified version of OQS-BIND in a docker container.
 Installation: `curl -sSL https://raw.githubusercontent.com/mr-torgue/docker-oqs-bind-udp-config/refs/heads/main/setup.sh | bash`
 
-
 # Limitations
 
 ## Manual Setup
@@ -36,3 +35,9 @@ BIND9 can be configured through the `.env` file:
 - FRAG_MODE: Either QBF or RAW, or, if not specified, it defaults to TCP.
 - DB: Specifies the DB file to use.
 Note that there is no centralization, so make sure that all the components run in a configuration that is compatible with each other.
+
+# Troubleshooting
+
+## Port in Use
+Docker containers forward 53, meaning that port 53 should be unused.
+Make sure to disable the default linux stub resolver and set an external DNS or use our bind implementation.

@@ -13,13 +13,6 @@ DEBUG=$3
 cp /named.conf /usr/local/etc/named.conf
 cp /db.example.local /usr/local/etc/bind/zones/db.example.local
 
-# sometimes daemon and bind9 use different names for the same sig scheme
-if [ "$ALG" = "SPHINCS+" ]; then
-    BIND_ALG=SPHINCS+-SHA256-128S
-else
-    BIND_ALG=$ALG
-fi
-
 # set fragmentation mode
 if [ "$FRAG_MODE" = "QBF" ]; then
     sed -i '/^options {/a\    udp-fragmentation QBF;' /usr/local/etc/named.conf
@@ -31,8 +24,8 @@ fi
 cd /usr/local/etc/bind/zones
 rm -rf *.key
 rm -rf *.private
-dnssec-keygen -a $BIND_ALG -n ZONE example.local
-dnssec-keygen -a $BIND_ALG -n ZONE -f KSK example.local
+dnssec-keygen -a $ALG -n ZONE example.local
+dnssec-keygen -a $ALG -n ZONE -f KSK example.local
 rndc-confgen -a > /usr/local/etc/bind/rndc.key
 rndc flush
 
@@ -46,7 +39,7 @@ ifconfig
 
 # update if available
 cd /OQS-bind
-./udpate.sh
+#./update.sh
 
 # start bind9
 cd /tmp

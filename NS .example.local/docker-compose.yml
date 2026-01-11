@@ -12,14 +12,13 @@ services:
             - ./named.conf:/named.conf
             - ./${DB}:/db.example.local
             - ./data:/tmp/
+            - ./dsset-.:/dsset-.
         ports:
-            - "1053:53/tcp"
-            - "1053:53/udp"
+            - "4053:53/tcp"
+            - "4053:53/udp"
         networks:
             bind9_net:
                 ipv4_address: 172.20.0.4
-        cap_add:
-           - CAP_NET_BIND_SERVICE
 
 networks:
     bind9_net:

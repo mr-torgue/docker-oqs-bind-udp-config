@@ -35,6 +35,7 @@ function remove_all_trust_anchors() {
 
 function install_trust_anchor() {
 	remove_all_trust_anchors
+
     if [[ ! -f /dsset-. ]]; then
         echo "Trust Anchor file /dsset-. does not exist!"
         exit 1
@@ -63,7 +64,7 @@ rndc flush
 
 # update if available
 cd /OQS-bind
-./udpate.sh
+#./update.sh
 
 # start bind9
 cd /tmp

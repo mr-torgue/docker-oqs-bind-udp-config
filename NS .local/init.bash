@@ -13,19 +13,12 @@ DEBUG=$3
 cp /named.conf /usr/local/etc/named.conf
 cp /db.local /usr/local/etc/bind/zones/db.local
 
-# sometimes daemon and bind9 use different names for the same sig scheme
-if [ "$ALG" = "SPHINCS+" ]; then
-    BIND_ALG=SPHINCS+-SHA256-128S
-else
-    BIND_ALG=$ALG
-fi
-
 # remove old keys and generate new ones 
 cd /usr/local/etc/bind/zones
 rm -rf *.key
 rm -rf *.private
-dnssec-keygen -a $BIND_ALG -n ZONE local
-dnssec-keygen -a $BIND_ALG -n ZONE -f KSK local
+dnssec-keygen -a $ALG -n ZONE local
+dnssec-keygen -a $ALG -n ZONE -f KSK local
 rndc-confgen -a > /usr/local/etc/bind/rndc.key
 rndc flush
 
@@ -42,6 +35,7 @@ then
     echo $DSREC >> "/usr/local/etc/bind/zones/db.local"
 fi
 # sign the zone and export DS record
+cd /usr/local/etc/bind/zones/
 dnssec-signzone -o local -N INCREMENT -t -S -K /usr/local/etc/bind/zones db.local
 cp /usr/local/etc/bind/zones/dsset-local. /tmp/
 
@@ -58,7 +52,7 @@ ifconfig
 
 # update if available
 cd /OQS-bind
-./udpate.sh
+#./update.sh
 
 # start bind9
 cd /tmp

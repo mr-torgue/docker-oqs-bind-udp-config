@@ -24,3 +24,4 @@ test6.example.local.            IN              A               42.42.42.6
 test7.example.local.            IN              A               42.42.42.7
 test8.example.local.            IN              A               42.42.42.8
 test9.example.local.            IN              A               42.42.42.9
+
