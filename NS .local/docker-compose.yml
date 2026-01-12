@@ -14,8 +14,8 @@ services:
             - ./data:/tmp/
             - ./dsset-example.local.:/dsset-example.local.
         ports:
-            - "3053:53/tcp"
-            - "3053:53/udp"
+            - "53:53/tcp"
+            - "53:53/udp"
         networks:
             bind9_net:
                 ipv4_address: 172.20.0.3

@@ -28,5 +28,6 @@ git clone https://github.com/mr-torgue/docker-oqs-bind-udp-config.git
 # Build the image and configure docker
 cd docker-oqs-bind-udp-config
 dockerd-rootless-setuptool.sh install
+setcap cap_net_bind_service=ep /usr/bin/rootlesskit
 docker build -t oqs-bind .
 docker network create --subnet=172.20.0.0/16 bind9_net

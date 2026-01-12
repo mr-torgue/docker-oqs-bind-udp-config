@@ -41,3 +41,9 @@ Note that there is no centralization, so make sure that all the components run i
 ## Port in Use
 Docker containers forward 53, meaning that port 53 should be unused.
 Make sure to disable the default linux stub resolver and set an external DNS or use our bind implementation.
+Also, make sure that when running two components on the same machine that they use different ports.
+
+## Unauthorized Port
+By default we use docker in rootless mode. To prevent problems, you can run docker as root.
+However, if you want to run BIND9 in a rootless container, make sure to set the permissions for port 53 with `setcap cap_net_bind_service=ep /usr/bin/rootlesskit`.
+Check if the permissions have been set before building the image with `getcap /usr/bin/rootlesskit`.
