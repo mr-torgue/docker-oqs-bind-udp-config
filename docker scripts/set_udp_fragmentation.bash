@@ -21,7 +21,7 @@ if [ ! -f "$namedconf_file" ]; then
 fi
 
 # remove old fragmentation mode
-sed -i '/.*udp_fragmentation.*;/d' $namedconf_file
+sed -i '/.*udp-fragmentation.*;/d' $namedconf_file
 
 # set fragmentation mode
 if [ "$FRAG_MODE" = "QBF" ]; then
