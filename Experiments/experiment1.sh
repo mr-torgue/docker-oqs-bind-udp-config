@@ -19,7 +19,7 @@ domain=test.example.local
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 CSV_FILE="experiment1_${TIMESTAMP}.csv"
 # write headers
-printf "\"Domain\",\"Timestamp\",\"Resolver\",\"Status\",\"Query Time\"\n" >> "$CSV_FILE"
+printf "\"Domain\",\"Timestamp\",\"Resolver\",\"Status\",\"Protocol\",\"Query Time\"\n" >> "$CSV_FILE"
 
 parse_dig_result() {
     local log_line="$1"
@@ -62,7 +62,7 @@ parse_dig_result() {
     echo "Status: $status"
     echo "Protocol: $protocol"
     # add to CSV
-    printf "\"$domain\",\"$timestamp\",\"$server\",\"$status\",\"$query_time\"\n" >> "$CSV_FILE"
+    printf "\"$domain\",\"$timestamp\",\"$server\",\"$status\",\"$protocol\",\"$query_time\"\n" >> "$CSV_FILE"
 }
 
 
