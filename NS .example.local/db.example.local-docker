@@ -24,4 +24,13 @@ test6.example.local.            IN              A               42.42.42.6
 test7.example.local.            IN              A               42.42.42.7
 test8.example.local.            IN              A               42.42.42.8
 test9.example.local.            IN              A               42.42.42.9
-
+test10.example.local.            IN              A               42.42.42.10
+test11.example.local.            IN              A               42.42.42.11
+test12.example.local.            IN              A               42.42.42.12
+test13.example.local.            IN              A               42.42.42.13
+test14.example.local.            IN              A               42.42.42.14
+test15.example.local.            IN              A               42.42.42.15
+test16.example.local.            IN              A               42.42.42.16
+test17.example.local.            IN              A               42.42.42.17
+test18.example.local.            IN              A               42.42.42.18
+test19.example.local.            IN              A               42.42.42.19

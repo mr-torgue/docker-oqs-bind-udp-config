@@ -10,12 +10,25 @@ Example dig outcome:
 ;; WHEN: Fri Jan 09 12:08:41 AEDT 2026
 ;; MSG SIZE  rcvd: 55
 '
+
+#resolver=15.134.173.185 # localhost if internal
+#resolver=8.8.8.8
+resolver=localhost
+port=53
+domain=test.example.local
+TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+CSV_FILE="experiment1_${TIMESTAMP}.csv"
+# write headers
+printf "\"Domain\",\"Timestamp\",\"Resolver\",\"Status\",\"Query Time\"\n" >> "$CSV_FILE"
+
 parse_dig_result() {
     local log_line="$1"
+    local domain="$2"
     local query_time=""
     local timestamp=""
     local server=""
     local status=""
+    local protocol=""
 
     # Extract query time (e.g., "26 msec")
     if [[ "$log_line" =~ \;\;[[:space:]]Query[[:space:]]time:[[:space:]]([0-9]+)[[:space:]]msec ]]; then
@@ -37,22 +50,27 @@ parse_dig_result() {
         status="${BASH_REMATCH[1]}"
     fi
 
+    # Extract UDP or TCP
+    if [[ "$log_line" =~ \;\;[[:space:]]SERVER:.*\(([A-Z]+)\) ]]; then
+        protocol="${BASH_REMATCH[1]}"
+    fi
+
     # Print results
     echo "Timestamp: $timestamp"
     echo "Query Time: ${query_time}ms"
     echo "Server: $server"
     echo "Status: $status"
+    echo "Protocol: $protocol"
+    # add to CSV
+    printf "\"$domain\",\"$timestamp\",\"$server\",\"$status\",\"$query_time\"\n" >> "$CSV_FILE"
 }
 
-#resolver=15.134.173.185 # localhost if internal
-#resolver=8.8.8.8
-resolver=localhost
-port=53
-domain=test.example.local
+
 output=$(dig @$resolver -p $port +timeout=10 +tries=1 $domain)
-parse_dig_result "$output"
-for i in {0..9}; do 
+parse_dig_result "$output" "$domain"
+for i in {0..19}; do 
 	domain=test$i.example.local
+    echo "$domain"
 	output=$(dig @$resolver -p $port +timeout=10 +tries=1 $domain)
-parse_dig_result "$output"
+    parse_dig_result "$output" "$domain"
 done
