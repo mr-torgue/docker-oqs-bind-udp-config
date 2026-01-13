@@ -12,7 +12,6 @@ services:
             - ./named.conf:/named.conf
             - ./${DB}:/db.example.local
             - ./data:/tmp/
-            - ./dsset-.:/dsset-.
         ports:
             - "53:53/tcp"
             - "53:53/udp"
