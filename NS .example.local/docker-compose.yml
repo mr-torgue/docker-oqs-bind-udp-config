@@ -9,6 +9,9 @@ services:
         command: ${ALG}
         volumes:
             - ./init.bash:/init.bash
+            - ../docker scripts/run_bind.bash:/run_bind.bash
+            - ../docker scripts/set_udp_fragmentation.bash:/set_udp_fragmentation.bash
+            - ../docker scripts/update_bind.bash:/update_bind.bash
             - ./named.conf:/named.conf
             - ./${DB}:/db.example.local
             - ./data:/tmp/
