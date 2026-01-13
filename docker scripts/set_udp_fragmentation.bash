@@ -7,11 +7,10 @@ supported:
 2. RAW
 '
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <FRAG_MODE>" >&2
-    exit 1
+if [ "$#" -eq 1 ]; then
+    FRAG_MODE=$1
 fi
-FRAG_MODE=$1
+FRAG_MODE=NONE
 
 namedconf_file="/usr/local/etc/named.conf"
 
@@ -22,7 +21,7 @@ if [ ! -f "$namedconf_file" ]; then
 fi
 
 # remove old fragmentation mode
-sed -i '/udp_fragmentation.*;/d' $namedconf_file
+sed -i '.*/udp_fragmentation.*;/d' $namedconf_file
 
 # set fragmentation mode
 if [ "$FRAG_MODE" = "QBF" ]; then
