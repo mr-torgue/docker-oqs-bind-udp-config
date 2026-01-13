@@ -10,4 +10,6 @@ fi
 cd /OQS-bind
 git fetch
 git checkout $release
+autoreconf -fi
+RUN CFLAGS="$CFLAGS -O0 -g" ./configure 
 make
