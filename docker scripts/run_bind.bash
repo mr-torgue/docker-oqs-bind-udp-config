@@ -25,9 +25,9 @@ fi
 echo "udp fragmentation: $udp_mode"
 
 dir=/usr/local/etc/bind/zones/
-echo -e "---------------------------\n"
-echo -e "|     Available Keys      |\n"
-echo -e "---------------------------\n"
+echo -e "---------------------------"
+echo -e "|     Available Keys      |"
+echo -e "---------------------------"
 while read -r file; do
     FILE_ALG=$(sed -n '2p' "$file" | awk -F'[()]' '{print $2}') 
     # check if key file exists
@@ -47,7 +47,7 @@ while read -r file; do
         exit 1
     fi
 done < <(find "$dir" -type f -name "K*.private")
-echo -e "---------------------------\n"
+echo -e "---------------------------"
 read -p "do you want to run bind with these settings? (Y/N): " choice
 
 # Check the user's input
