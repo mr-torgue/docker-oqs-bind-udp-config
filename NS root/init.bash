@@ -38,6 +38,7 @@ cp /usr/local/etc/bind/zones/dsset-. /tmp/
 # print some info
 cat /usr/local/etc/named.conf
 ifconfig  
+cat /usr/local/etc/bind/zones/db.root
 cat /usr/local/etc/bind/zones/dsset-.
 sha256sum /usr/local/etc/bind/zones/dsset-.
 /bin/bash
