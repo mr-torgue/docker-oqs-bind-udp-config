@@ -7,10 +7,10 @@ supported:
 2. RAW
 '
 
+FRAG_MODE=NONE
 if [ "$#" -eq 1 ]; then
     FRAG_MODE=$1
 fi
-FRAG_MODE=NONE
 
 namedconf_file="/usr/local/etc/named.conf"
 
