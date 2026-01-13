@@ -38,4 +38,6 @@ cp /usr/local/etc/bind/zones/dsset-local. /tmp/
 # print some info
 cat /usr/local/etc/named.conf
 ifconfig
+cat /usr/local/etc/bind/zones/dsset-local.
+sha256sum /usr/local/etc/bind/zones/dsset-local.
 /bin/bash
