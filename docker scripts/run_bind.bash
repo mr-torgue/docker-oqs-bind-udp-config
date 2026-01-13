@@ -20,12 +20,11 @@ echo "bind version: $version"
 namedconf_file="/usr/local/etc/named.conf"
 udp_mode=NONE
 if [[ -f $version_file ]]; then
-    udp_mode=$(awk '/udp_fragmentation/ {print $2}' /usr/local/etc/named.conf | tr -d ';')
+    udp_mode=$(sed -n 's/.*udp_fragmentation\s\+\([^;]*\).*/\1/p' /usr/local/etc/named.conf)
 fi
 echo "udp fragmentation: $udp_mode"
 
 dir=/usr/local/etc/bind/zones/
-cipher=NONE
 while read -r file; do
     FILE_ALG=$(sed -n '2p' "$file" | awk -F'[()]' '{print $2}') 
     # check if key file exists
@@ -45,7 +44,6 @@ while read -r file; do
         exit 1
     fi
 done < <(find "$dir" -type f -name "K*.private")
-echo "cipher: $cipher"
 read -p "do you want to run bind with these settings? (Y/N): " choice
 
 # Check the user's input
