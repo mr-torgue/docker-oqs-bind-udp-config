@@ -45,4 +45,5 @@ install_trust_anchor
 # print some information
 cat /usr/local/etc/named.conf
 ifconfig 
+sha256sum /dsset-.
 /bin/bash
