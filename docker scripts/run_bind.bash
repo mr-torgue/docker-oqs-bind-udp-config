@@ -19,7 +19,7 @@ echo "bind version: $version"
 
 namedconf_file="/usr/local/etc/named.conf"
 udp_mode=NONE
-if [[ -f $version_file ]]; then
+if [[ -f $namedconf_file ]]; then
     udp_mode=$(sed -n 's/.*udp-fragmentation\s\+\([^;]*\).*/\1/p' $namedconf_file)
 fi
 echo "udp fragmentation: $udp_mode"

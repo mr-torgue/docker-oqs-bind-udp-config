@@ -10,3 +10,4 @@ fi
 cd /OQS-bind
 git fetch
 git checkout $release
+make
