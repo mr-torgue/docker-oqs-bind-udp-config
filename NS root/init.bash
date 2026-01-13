@@ -1,13 +1,11 @@
 #! /bin/bash
 
-if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <ALGORITHM> <FRAG_MODE> <DEBUG>" >&2
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <ALGORITHM>" >&2
     exit 1
 fi
 
 ALG=$1
-FRAG_MODE=$2
-DEBUG=$3
 
 # copy the config files so that we can edit them
 cp /named.conf /usr/local/etc/named.conf
@@ -19,8 +17,6 @@ rm -rf *.key
 rm -rf *.private
 dnssec-keygen -a $ALG -n ZONE .
 dnssec-keygen -a $ALG -n ZONE -f KSK .
-rndc-confgen -a > /usr/local/etc/bind/rndc.key
-rndc flush
 
 # add DS record from local.
 if [[ ! -f /dsset-local. ]]; then
@@ -39,28 +35,7 @@ cd /usr/local/etc/bind/zones
 dnssec-signzone -o . -N INCREMENT -t -S -K /usr/local/etc/bind/zones db.root;  
 cp /usr/local/etc/bind/zones/dsset-. /tmp/
 
-# set fragmentation mode
-if [ "$FRAG_MODE" = "QBF" ]; then
-    sed -i '/^options {/a\    udp-fragmentation QBF;' /usr/local/etc/named.conf
-elif [ "$FRAG_MODE" = "RAW" ]; then
-    sed -i '/^options {/a\    udp-fragmentation RAW;' /usr/local/etc/named.conf
-fi
-
 # print some info
 cat /usr/local/etc/named.conf
 ifconfig  
-
-# update if available
-cd /OQS-bind
-#./update.sh
-
-# start bind9
-cd /tmp
-if [ "$DEBUG" = "true" ]; then
-    echo "DEBUG MODE"
-    tcpdump -i any -w /tmp/$ALG-ns-root.pcap &
-    gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
-else
-    named -g -d 3
-fi
 /bin/bash

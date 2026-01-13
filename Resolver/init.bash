@@ -1,13 +1,5 @@
 #! /bin/bash
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <UDP FRAGMENTATION TYPE> <DEBUG>" >&2
-    exit 1
-fi
-
-FRAG_MODE=$1
-DEBUG=$2
-
 # copy the config files so that we can edit them
 cp /named.conf /usr/local/etc/named.conf
 cp /root.hints /usr/local/etc/bind/root/hints/root.hints
@@ -50,29 +42,6 @@ function install_trust_anchor() {
 # add the DS record of the root NS
 install_trust_anchor
 
-# set fragmentation mode
-if [ "$FRAG_MODE" = "QBF" ]; then
-    sed -i '/^options {/a\    udp-fragmentation QBF;' /usr/local/etc/named.conf
-elif [ "$FRAG_MODE" = "RAW" ]; then
-    sed -i '/^options {/a\    udp-fragmentation RAW;' /usr/local/etc/named.conf
-fi
-
 # print some information
 cat /usr/local/etc/named.conf
 ifconfig 
-rndc flush
-
-# update if available
-cd /OQS-bind
-#./update.sh
-
-# start bind9
-cd /tmp
-if [ "$DEBUG" = "true" ]; then
-    echo "DEBUG MODE"
-    tcpdump -i any -w /tmp/$ALG-resolver.pcap &
-    gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
-else
-    named -g -d 3
-fi
-/bin/bash
