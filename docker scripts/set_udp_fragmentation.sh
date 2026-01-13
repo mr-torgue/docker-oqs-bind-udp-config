@@ -2,6 +2,9 @@
 : '
 sets the UDP fragmentation mode in named.conf
 overwrites if already exists
+supported:
+1. QBF
+2. RAW
 '
 
 if [ "$#" -ne 1 ]; then

@@ -6,7 +6,7 @@ services:
         tty: true
         entrypoint:
             - /init.bash 
-        command: ${ALG} ${FRAG_MODE} ${DEBUG}
+        command: ${ALG}
         volumes:
             - ./init.bash:/init.bash
             - ./named.conf:/named.conf
