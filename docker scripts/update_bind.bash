@@ -2,7 +2,7 @@
 : '
 updates the OQS-BIND code on the container
 '
-release=v1.0.1
+release=v1.0.2
 if [ "$#" -eq 1 ]; then
     release=$1
 fi
@@ -10,6 +10,7 @@ fi
 cd /OQS-bind
 git fetch
 git checkout $release
+git pull
 autoreconf -fi
 RUN CFLAGS="$CFLAGS -O0 -g" ./configure 
 make
