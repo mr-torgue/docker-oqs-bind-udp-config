@@ -16,6 +16,7 @@ if [[ -f $version_file ]]; then
     version=$(<$version_file)
 fi
 echo "bind version: $version"
+echo "named version: $(named -v)"
 
 namedconf_file="/usr/local/etc/named.conf"
 udp_mode=NONE
