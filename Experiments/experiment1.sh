@@ -18,8 +18,6 @@ port=53
 domain=test.example.local
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 CSV_FILE="experiment1_${TIMESTAMP}.csv"
-# write headers
-printf "\"Domain\",\"Timestamp\",\"Resolver\",\"Status\",\"Protocol\",\"Query Time\"\n" >> "$CSV_FILE"
 
 parse_dig_result() {
     local log_line="$1"
@@ -60,17 +58,21 @@ parse_dig_result() {
     echo "Query Time: ${query_time}ms"
     echo "Server: $server"
     echo "Status: $status"
-    echo "Protocol: $protocol"
     # add to CSV
-    printf "\"$domain\",\"$timestamp\",\"$server\",\"$status\",\"$protocol\",\"$query_time\"\n" >> "$CSV_FILE"
+    printf "\"$domain\",\"$timestamp\",\"$server\",\"$status\",\"$query_time\"\n" >> "$CSV_FILE"
 }
 
-
-output=$(dig @$resolver -p $port +timeout=10 +tries=1 $domain)
+read -p "Algorithm is being used: " algorithm
+read -p "Fragmentation strategy: " strategy
+# write the info to file
+printf "\"algorithm: $algorithm\",\"strategy: $strategy\",\"\",\"\",\"\"\n" >> "$CSV_FILE"
+# write headers
+printf "\"Domain\",\"Timestamp\",\"Resolver\",\"Status\",\"Query Time\"\n" >> "$CSV_FILE"
+output=$(time dig @$resolver -p $port +timeout=10 +tries=1 $domain)
 parse_dig_result "$output" "$domain"
 for i in {0..19}; do 
 	domain=test$i.example.local
     echo "$domain"
-	output=$(dig @$resolver -p $port +timeout=10 +tries=1 $domain)
+	output=$(time dig @$resolver -p $port +timeout=10 +tries=1 $domain)
     parse_dig_result "$output" "$domain"
 done
