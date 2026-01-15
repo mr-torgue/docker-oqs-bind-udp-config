@@ -64,8 +64,10 @@ parse_dig_result() {
 
 read -p "Algorithm is being used: " algorithm
 read -p "Fragmentation strategy: " strategy
+read -p "Delay: " delay
+read -p "Rate: " rate
 # write the info to file
-printf "\"algorithm: $algorithm\",\"strategy: $strategy\",\"\",\"\",\"\"\n" >> "$CSV_FILE"
+printf "\"algorithm: $algorithm\",\"strategy: $strategy\",\"delay: $delay\",\"rate: $rate\",\"\"\n" >> "$CSV_FILE"
 # write headers
 printf "\"Domain\",\"Timestamp\",\"Resolver\",\"Status\",\"Query Time\"\n" >> "$CSV_FILE"
 output=$(time dig @$resolver -p $port +timeout=10 +tries=1 $domain)
