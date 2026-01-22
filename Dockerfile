@@ -34,7 +34,7 @@ WORKDIR oqs-provider
 RUN cmake -S . -B _build && cmake --build _build && cmake --install _build
 # Install OQS-bind
 WORKDIR /
-RUN git clone https://github.com/mr-torgue/OQS-bind.git --branch v1.0
+RUN git clone https://github.com/mr-torgue/OQS-bind.git --branch v1.2.1
 WORKDIR OQS-bind
 RUN autoreconf -fi
 # For debugging: remove in production
