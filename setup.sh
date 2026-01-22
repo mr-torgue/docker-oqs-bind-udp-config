@@ -25,6 +25,14 @@ sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 # Clone the git repositories
 git clone https://github.com/mr-torgue/docker-oqs-bind-udp-config.git
 
+# Remove resolver and set 8.8.8.8 and 8.8.4.4
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
+sudo systemctl mask systemd-resolved
+sudo rm /etc/resolv.conf
+echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolv.conf > /dev/null
+echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf > /dev/null
+
 # Build the image and configure docker
 cd docker-oqs-bind-udp-config
 dockerd-rootless-setuptool.sh install
