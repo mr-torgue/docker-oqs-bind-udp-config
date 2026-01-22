@@ -2,7 +2,7 @@
 : '
 updates the OQS-BIND code on the container
 '
-release=v1.0.2
+release=v1.2.1
 if [ "$#" -eq 1 ]; then
     release=$1
 fi
