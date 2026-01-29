@@ -1,0 +1,4 @@
+matplotlib
+seaborn
+PyQT5
+scipy
