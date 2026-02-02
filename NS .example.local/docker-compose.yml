@@ -16,8 +16,8 @@ services:
             - ./${DB}:/db.example.local
             - ./data:/tmp/
         ports:
-            - "53:53/tcp"
-            - "53:53/udp"
+            - "4053:53/tcp"
+            - "4053:53/udp"
         cap_add:
             - NET_ADMIN
         networks:

@@ -14,24 +14,24 @@ from ripe.atlas.cousteau import (
   AtlasLatestRequest
 )
 
-
 load_dotenv()
 ATLAS_API_KEY = os.getenv("API_KEY")
 
-
-ATLAS_API_KEY = "a225f49e-03d7-41ca-9a94-926720b4f7cb"
-DESCRIPTION = "[Hydra DNS] FALCON512 SP"
-RESOLVER = "15.134.173.185"
-NR=20
-
-
-def run_experiment(nr_sources, nr_queries, resolver, domain, description):
-    source = AtlasSource(
-        type="area",
-        value="WW",
-        requested=nr_sources,
-        tags={"include":["system-ipv4-works"]}
-    )
+def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country):
+    if country == "ww":
+        source = AtlasSource(
+            type="area",
+            value="WW",
+            requested=nr_sources,
+            tags={"include":["system-ipv4-works"]}
+        )
+    else:
+        source = AtlasSource(
+            type="country",
+            value=country,
+            requested=nr_sources,
+            tags={"include":["system-ipv4-works"]}
+        )
     prefix, suffix = domain.split(".", 1)
     for i in range(nr_queries):
         newdomain = "%s%d.%s" % (prefix, i, suffix)
@@ -45,6 +45,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description):
             target=resolver,
             use_probe_resolver=false,
             udp_payload_size=1232,
+            tags: ["label: %s" %label, "algorithm: %s" % algorithm, "strategy: %s" %strategy]
         )
 
         atlas_request = AtlasCreateRequest(
@@ -55,21 +56,12 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description):
         )
 
         (is_success, response) = atlas_request.create()
-
-# returns the results in csv format
-def get_results(id):
-
-    kwargs = {
-        "msm_id": id,
-    }
-
-    is_success, results = AtlasLatestRequest(**kwargs).create()
-    df = pd.read_json()
-    csv = df.to_csv() 
+        
 
 
 def main():
-    parser = argparse.ArgumentParser(description="DNS Query Tool for DNSSEC/Merkle Tree Research")
+
+    parser = argparse.ArgumentParser(description="Executes Experiments for Hydra DNS on RIPE Atlas")
 
     # Required arguments
     parser.add_argument("-r", "--resolver", required=True, help="DNS resolver IP or hostname")
@@ -80,16 +72,49 @@ def main():
     parser.add_argument("--domain", required=True, help="Domain to query")
 
     # Optional arguments
-    parser.add_argument("-d", "--description", help="Description for the query")
+    parser.add_argument("-d", "--description", help="Description for the query (default: [Hydra DNS])", default="[Hydra DNS]")
+    parser.add_argument("-c", "--country", help="Country code (default: WW)", default="WW")
+    parser.add_argument("-n", "--nr_sources", type=int, help="Number of sources (default: 5)", default=5)
+    parser.add_argument("-q", "--nr_queries", type=int, help="Number of queries (default: 20)", default=20)
+    parser.add_argument("-f", "--frequency", type=int, help="Frequency in seconds (default: 0)", default=0)
+    parser.add_argument("--start_date", help="Start date (default: now)", default=datetime.now().isoformat())
+    parser.add_argument("--end_date", help="End date (default: now + 1 day)", default=(datetime.now() + timedelta(days=1)).isoformat())
 
     args = parser.parse_args()
 
-    # Print configuration (replace with your logic)
+    # Print configuration
     print("Configuration:")
     print(f"  Resolver:    {args.resolver}")
     print(f"  Port:        {args.port}")
     print(f"  Label:       {args.label}")
-    print(f"  Description: {args.description if args.description else 'Not provided'}")
+    print(f"  Description: {args.description}")
     print(f"  Algorithm:   {args.algorithm}")
     print(f"  Strategy:    {args.strategy}")
     print(f"  Domain:      {args.domain}")
+    print(f"  Country:     {args.country}")
+    print(f"  Nr. Sources: {args.nr_sources}")
+    print(f"  Nr. Queries: {args.nr_queries}")
+    if (frequency > 0) {
+        print(f"  Frequency:   {args.frequency}")
+        print(f"  Start Date:  {args.start_date}")
+        print(f"  End Date:    {args.end_date}")
+    }
+    else {
+        print(f"  Frequency:   One-off")
+    }
+    # Ask user to confirm
+    user_input = input("Press Y/y to confirm and run the experiment: ")
+    if user_input.lower() == 'y':
+        run_experiment(
+            nr_sources=args.nr_sources,
+            nr_queries=args.nr_queries,
+            resolver=args.resolver,
+            domain=args.domain,
+            description=args.description,
+            label=args.label,
+            algorithm=args.algorithm,
+            strategy=args.strategy,
+            country=args.country
+        )
+    else:
+        print("Experiment cancelled by user")

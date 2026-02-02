@@ -8,8 +8,9 @@ import argparse
 
 from collections import defaultdict
 from scipy.stats import f_oneway
+
 '''
-CSV format:
+CSV format for the AWS experiments with local client:
 "label","description","algorithm","strategy","delay","rate"
 "unique label","We run this experiment locally using docker!","FALCON512","QBF","0","0"
 "Domain","Timestamp","Resolver","Status","Query Time"
@@ -19,7 +20,7 @@ We convert the first part to metadata (label, description, algorithm, and strate
 After that we conver the data into a dataframe
 Optionally, we skip the first row
 '''
-def csv_to_df(csv_file, skip_first=False):
+def csv_to_df_aws(csv_file, skip_first=False):
     if not os.path.exists(csv_file):
         print(f"File '{csv_file}' does not exist.")
         return
@@ -33,15 +34,37 @@ def csv_to_df(csv_file, skip_first=False):
         if "label" not in metadata.keys() or "algorithm" not in metadata.keys() or "strategy" not in metadata.keys():
             print("metadata incomplete!")
             exit()
-        print(metadata)
 
     # read csv and add some rows
     df = pd.read_csv(csv_file, skiprows=2)
     df = df.assign(group="%s-%s-%s" % (metadata["label"], metadata["strategy"], metadata["algorithm"]))
     return {"df": df, "label": metadata["label"], "description": metadata["description"], "algorithm": metadata["algorithm"], "strategy": metadata["strategy"] }
 
+'''
+CSV file from a RIPE Atlas measurement has the following format:
+fw,mver,lts,dst_addr,dst_port,af,src_addr,proto,result,msm_id,prb_id,timestamp,msm_name,from,type,group_id,stored_timestamp
 
-def all_csv_to_df(folder_path, skip_first=False):
+Each result is a JSON object
+'''
+def csv_to_df_ripe_atlas(csv_file, skip_first=False):
+    
+    if not os.path.exists(csv_file):
+        print(f"File '{csv_file}' does not exist.")
+        return
+    # read csv and add some rows
+    df = pd.read_csv(csv_file, skiprows=skip_first)
+    df['result'] = df['result'].apply(lambda x: eval(x) if isinstance(x, str) else x)
+    df = pd.json_normalize(df['result'])
+
+    
+
+    df = df.assign(group="%s-%s-%s" % (df["label"], df["strategy"], df["algorithm"]))
+    return {"df": df, "label": df["label"], "description": df["description"], "algorithm": df["algorithm"], "strategy": df["strategy"]}
+
+'''
+Converts all CSV files in a folder to an array of dataframes
+'''
+def all_csv_to_df(folder_path, skip_first=False, _type="AWS"):
     if not os.path.exists(folder_path):
         print(f"Error: The folder '{folder_path}' does not exist.")
         return
@@ -56,7 +79,12 @@ def all_csv_to_df(folder_path, skip_first=False):
     results = []
     for csv_file in csv_files:
         file_path = os.path.join(folder_path, csv_file)
-        results.append(csv_to_df(file_path, skip_first))
+        if _type == "AWS":
+            results.append(csv_to_df_aws(file_path, skip_first))
+        elif _type == "RIPE":
+            results.append(csv_to_df_ripe_atlas(file_path, skip_first))
+        else
+            print("%s is not an accepted value for type!" % (_type))
     return results
 
 def print_statistics(df_desc_dict):
@@ -138,6 +166,12 @@ def main():
         default=False,
         help="Skip the first row of each CSV file (default: False)"
     )
+    parser.add_argument(
+        "--type",
+        action="store_true",
+        default="AWS",
+        help="Indicates if we use AWS (local client) or RIPE Atlas (external clients). Options: AWS, RIPE (default: AWS)"
+    )
 
     args = parser.parse_args()
 
@@ -145,6 +179,7 @@ def main():
         print(f"Error: {args.directory} is not a valid directory.")
         return
 
+    if args.type == "AWS":
     dfs = all_csv_to_df(args.directory, args.skip_first_row)
     print_statistics(dfs)
     boxplots(dfs)
@@ -156,8 +191,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# matplotlib
-# seaborn
-# PyQT5
-# scipy

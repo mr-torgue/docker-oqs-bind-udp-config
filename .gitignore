@@ -1,3 +1,6 @@
 **/data/*
 !**/data/
 **/dsset*
+Experiments/.venv
+Experiments/.venv/*
+Experiments/.env
