@@ -3,3 +3,5 @@ seaborn
 PyQT5
 scipy
 ripe-atlas-cousteau
+dotenv
+scikit-posthocs

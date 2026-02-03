@@ -5,20 +5,23 @@ Sends 25 requests for test%d.example.local
 import os
 import argparse
 
+from time import sleep
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 from ripe.atlas.cousteau import (
   Dns,
   AtlasSource,
   AtlasCreateRequest,
   AtlasLatestRequest
 )
+from get_ripe_results import get_results_with_metadata, get_measurements_with_metadata
 
 load_dotenv()
-ATLAS_API_KEY = os.getenv("API_KEY")
+ATLAS_API_KEY = os.getenv("ATLAS_API_KEY")
 
 def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country):
-    if country == "ww":
+    description = "%s {\"algorithm\": \"%s\", \"strategy\": \"%s\", \"label\": \"%s\"}" % (description, algorithm, strategy, label)
+    if country == "WW":
         source = AtlasSource(
             type="area",
             value="WW",
@@ -33,29 +36,36 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             tags={"include":["system-ipv4-works"]}
         )
     prefix, suffix = domain.split(".", 1)
+    measurements=[]
     for i in range(nr_queries):
         newdomain = "%s%d.%s" % (prefix, i, suffix)
-        print("sending query %s to resolver %s" % (newdomain, resolver))
-        dns = Dns(
+        measurements.append(Dns(
             af=4,
             description=description,
             query_class="IN",
             query_type="A",
             query_argument=newdomain,
             target=resolver,
-            use_probe_resolver=false,
+            use_probe_resolver=False,
             udp_payload_size=1232,
-            tags: ["label: %s" %label, "algorithm: %s" % algorithm, "strategy: %s" %strategy]
-        )
+        ))
 
-        atlas_request = AtlasCreateRequest(
-            key=ATLAS_API_KEY,
-            measurements=[dns],
-            sources=[source],
-            is_oneoff=True
-        )
+    atlas_request = AtlasCreateRequest(
+        key=ATLAS_API_KEY,
+        measurements=measurements,
+        sources=[source],
+        is_oneoff=True
+    )
 
-        (is_success, response) = atlas_request.create()
+    (is_success, response) = atlas_request.create()
+    if is_success:
+        ids = response["measurements"]
+        print("Success! Saving ids %s to CSV!" % (ids))
+        get_measurements_with_metadata(ids, label, algorithm, strategy)
+        sleep(10)
+        get_results_with_metadata(ids, label, algorithm, strategy)
+    else:
+        print("Request failed: %s" % (response))
         
 
 
@@ -94,14 +104,12 @@ def main():
     print(f"  Country:     {args.country}")
     print(f"  Nr. Sources: {args.nr_sources}")
     print(f"  Nr. Queries: {args.nr_queries}")
-    if (frequency > 0) {
+    if args.frequency > 0:
         print(f"  Frequency:   {args.frequency}")
         print(f"  Start Date:  {args.start_date}")
         print(f"  End Date:    {args.end_date}")
-    }
-    else {
+    else:
         print(f"  Frequency:   One-off")
-    }
     # Ask user to confirm
     user_input = input("Press Y/y to confirm and run the experiment: ")
     if user_input.lower() == 'y':
@@ -118,3 +126,6 @@ def main():
         )
     else:
         print("Experiment cancelled by user")
+
+if __name__ == "__main__":
+    main()

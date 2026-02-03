@@ -7,7 +7,8 @@ import csv
 import argparse
 
 from collections import defaultdict
-from scipy.stats import f_oneway
+from scipy.stats import f_oneway, kruskal
+from scikit_posthocs import posthoc_dunn
 
 '''
 CSV format for the AWS experiments with local client:
@@ -21,24 +22,26 @@ After that we conver the data into a dataframe
 Optionally, we skip the first row
 '''
 def csv_to_df_aws(csv_file, skip_first=False):
-    if not os.path.exists(csv_file):
-        print(f"File '{csv_file}' does not exist.")
-        return
-    with open(csv_file, mode ='r') as file:
+    try:
+        with open(csv_file, mode ='r') as file:
 
-        # parse the metadata
-        reader = csv.reader(file)
-        header = next(reader)  
-        first_row = next(reader)  
-        metadata = dict(zip(header, first_row))
-        if "label" not in metadata.keys() or "algorithm" not in metadata.keys() or "strategy" not in metadata.keys():
-            print("metadata incomplete!")
-            exit()
+            # parse the metadata
+            reader = csv.reader(file)
+            header = next(reader)  
+            first_row = next(reader)  
+            metadata = dict(zip(header, first_row))
+            if "label" not in metadata.keys() or "algorithm" not in metadata.keys() or "strategy" not in metadata.keys():
+                print("metadata incomplete!")
+                exit()
 
-    # read csv and add some rows
-    df = pd.read_csv(csv_file, skiprows=2)
-    df = df.assign(group="%s-%s-%s" % (metadata["label"], metadata["strategy"], metadata["algorithm"]))
-    return {"df": df, "label": metadata["label"], "description": metadata["description"], "algorithm": metadata["algorithm"], "strategy": metadata["strategy"] }
+        # read csv and add some rows
+        df = pd.read_csv(csv_file, skiprows=2)
+        df = df.assign(strategy="%s" % (metadata["strategy"]))
+        df = df.assign(algorithm="%s" % (metadata["algorithm"]))
+        df = df.assign(group="%s-%s-%s" % (metadata["label"], metadata["strategy"], metadata["algorithm"]))
+        return {"df": df, "label": metadata["label"] }
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 '''
 CSV file from a RIPE Atlas measurement has the following format:
@@ -48,58 +51,38 @@ Each result is a JSON object
 '''
 def csv_to_df_ripe_atlas(csv_file, skip_first=False):
     
-    if not os.path.exists(csv_file):
-        print(f"File '{csv_file}' does not exist.")
-        return
     # read csv and add some rows
-    df = pd.read_csv(csv_file, skiprows=skip_first)
-    df['result'] = df['result'].apply(lambda x: eval(x) if isinstance(x, str) else x)
-    df = pd.json_normalize(df['result'])
-
-    
-
-    df = df.assign(group="%s-%s-%s" % (df["label"], df["strategy"], df["algorithm"]))
-    return {"df": df, "label": df["label"], "description": df["description"], "algorithm": df["algorithm"], "strategy": df["strategy"]}
-
+    df = pd.read_csv(csv_file)
+    df["group"] = df.apply(lambda row: f"{row['label']}-{row['strategy']}-{row['algorithm']}", axis=1)
+    df = df.rename(columns={'result.rt': 'Query Time'})
+    return {"df": df}
 '''
 Converts all CSV files in a folder to an array of dataframes
 '''
-def all_csv_to_df(folder_path, skip_first=False, _type="AWS"):
-    if not os.path.exists(folder_path):
-        print(f"Error: The folder '{folder_path}' does not exist.")
-        return
-    # List all files in the folder
-    files = sorted(os.listdir(folder_path))
-    csv_files = [file for file in files if file.endswith('.csv')]
-
-    if not csv_files:
-        print(f"No CSV files found in '{folder_path}'.")
-        return
-    print("Found %d csv files" % (len(csv_files)))
-    results = []
-    for csv_file in csv_files:
-        file_path = os.path.join(folder_path, csv_file)
+def all_csv_to_df(filenames, skip_first=False, _type="AWS"):
+    dfs = []
+    for filename in filenames:
         if _type == "AWS":
-            results.append(csv_to_df_aws(file_path, skip_first))
+            result = csv_to_df_aws(filename, skip_first)
         elif _type == "RIPE":
-            results.append(csv_to_df_ripe_atlas(file_path, skip_first))
-        else
+            result = csv_to_df_ripe_atlas(filename, skip_first)
+        else:
             print("%s is not an accepted value for type!" % (_type))
-    return results
+            return None
+        dfs.append(result["df"])
+    if dfs == []:
+        return None
+    df = pd.concat([x for x in dfs], ignore_index=True)
+    return df
 
-def print_statistics(df_desc_dict):
-    for df_desc in df_desc_dict:
-        df = df_desc["df"]
-        description = df_desc["description"]
-        mean = df["Query Time"].mean()
-        std = df["Query Time"].std()
+def print_statistics(df):
+    mean = df["Query Time"].mean()
+    std = df["Query Time"].std()
 
-        print(f"Average: {mean:.2f}")
-        print(f"Standard Deviation: {std:.2f}")
+    print(f"Average: {mean:.2f}")
+    print(f"Standard Deviation: {std:.2f}")
 
-def boxplots(df_desc_dict):
-    # combine all in one df
-    concatenated_df = pd.concat([df_desc["df"] for df_desc in df_desc_dict], axis=0, ignore_index=True)
+def boxplots(df):
 
     # Set the style for better aesthetics
     sns.set(style="whitegrid")
@@ -108,7 +91,7 @@ def boxplots(df_desc_dict):
     plt.figure(figsize=(10, 6))
 
     # Generate boxplots
-    sns.boxplot(x='group', y='Query Time', data=concatenated_df, palette='Set2', native_scale=True)
+    sns.boxplot(x='group', y='Query Time', data=df, palette='Set2', native_scale=True)
 
     # Customize the plot
     plt.title('Sequence of Boxplots by Group', fontsize=16)
@@ -119,35 +102,62 @@ def boxplots(df_desc_dict):
     plt.show()
 
 '''
-tests if experiments can come from the same distribution
-group_by splits the dataframes in distinct groups (often TCP/QBF)
-by default it compares if the different algorithms within a strategy could have come from the same distribution
+dist test on df with levels either strategy, algorithm, or both
+we assume df is already filtered (e.g. if you want to do a test on algorithm within TCP, we assume TCP data has been provided)
 '''
-def dist_test(df_desc_dict, group_by="strategy"):
-    # do the group by, set to default if not strategy or algorithm
+def dist_test(df, levels="both"):
+    alpha = 0.05
+    if levels not in ["strategy", "algorithm", "both"]:
+        print("Invalid levels parameter. Must be 'strategy', 'algorithm', or both")
+        return
+
+    # split into groups
     groups = defaultdict(list)
-    for df_desc in df_desc_dict:
-        df = df_desc["df"]
-        description = df_desc["description"]
-        try:
-            group_by_val = df_desc[group_by]
-        except:
-            group_by_val = "default"
-        groups[group_by_val].append(df)
-        print(group_by_val)
-    print("found %d groups: %s" % (len(groups), list(groups.keys())))
+    if levels is None:
+        for _, row in df.iterrows():
+            group_key = f"{row['strategy']}-{row['algorithm']}"
+            groups[group_key].append(row['Query Time'])
+    else:
+        for _, row in df.iterrows():
+            group_key = row[levels]
+            groups[group_key].append(row['Query Time'])
 
-    # Perform ANOVA for each 'a'
-    for group_by_val, dfs in groups.items():
-        group_data = [df["Query Time"] for df in dfs]
-        try:
-            f_stat, p_value = f_oneway(*group_data)
+    print(f"Performing ANOVA and Kruskal-Wallis tests grouped by '{levels}':")
+    print(f"Found {len(groups)} groups: {list(groups.keys())}")
 
-            print(f"ANOVA for a={group_by_val}:")
-            print(f"  F-statistic: {f_stat:.4f}")
-            print(f"  p-value: {p_value:.4f}")
-        except TypeError as e:
-            print("Error: %s" % (e))
+    data = list(groups.values())
+    if len(data) < 2:
+        print(f"\nData '{levels}' has only {len(data)} dataset(s) - ANOVA and Kruskal-Wallis require at least 2")
+        return
+    try:
+        f_stat, p_value = f_oneway(*data)
+        print(f"\nANOVA results for level var '{levels}':")
+        print(f"  F-statistic: {f_stat:.4f}")
+        print(f"  p-value: {p_value:.4f}")
+        if p_value < alpha:
+            print("  Conclusion: Reject null hypothesis - significant differences exist")
+        else:
+            print("  Conclusion: Fail to reject null hypothesis - no significant differences")
+    except Exception as e:
+        print(f"\nError processing ANOVA for level var '{levels}': {str(e)}")
+
+    try:
+        h_stat, p_value_kruskal = kruskal(*data)
+        print(f"\nKruskal-Wallis results for level var '{levels}':")
+        print(f"  H-statistic: {h_stat:.4f}")
+        print(f"  p-value: {p_value_kruskal:.4f}")
+        if p_value_kruskal < alpha:
+            print("  Conclusion: Reject null hypothesis - significant differences exist")
+        else:
+            print("  Conclusion: Fail to reject null hypothesis - no significant differences")
+
+        # Post-hoc tests if Kruskal-Wallis is significant
+        if p_value_kruskal < alpha:
+            print("\nPerforming post-hoc tests (Dunn's test):")
+            posthoc_results = posthoc_dunn(data, p_adjust='bonferroni')
+            print(posthoc_results)
+    except Exception as e:
+        print(f"\nError processing Kruskal-Wallis for level var '{levels}': {str(e)}")
 
 
 
@@ -156,9 +166,10 @@ def main():
         description="Process CSV files in a directory, with an option to skip the first row."
     )
     parser.add_argument(
-        "directory",
+        "filenames",
         type=str,
-        help="Path to the directory containing CSV files"
+        nargs='+',
+        help="List of CSV filenames to process"
     )
     parser.add_argument(
         "--skip-first-row",
@@ -168,24 +179,30 @@ def main():
     )
     parser.add_argument(
         "--type",
-        action="store_true",
+        type=str,
         default="AWS",
         help="Indicates if we use AWS (local client) or RIPE Atlas (external clients). Options: AWS, RIPE (default: AWS)"
     )
 
     args = parser.parse_args()
-
-    if not os.path.isdir(args.directory):
-        print(f"Error: {args.directory} is not a valid directory.")
-        return
-
-    if args.type == "AWS":
-    dfs = all_csv_to_df(args.directory, args.skip_first_row)
-    print_statistics(dfs)
-    boxplots(dfs)
-    dist_test(dfs, group_by="strategy") 
-    dist_test(dfs, group_by="algorithm") 
-    #dist_test(dfs, group_by=None) 
+    # load the CSV into a set of dataframes
+    df = all_csv_to_df(args.filenames, args.skip_first_row, args.type)
+    try:
+        print("General Statistics:")
+        print_statistics(df)
+        boxplots(df)
+        for algorithm in df["algorithm"].unique():
+            print("Analyzing strategy for algorithm %s" % (algorithm))
+            df_filtered = df[df["algorithm"] == algorithm]
+            dist_test(df_filtered, levels="strategy")
+        for strategy in df["strategy"].unique():
+            print("Analyzing algorithm for strategy %s" % (strategy))
+            df_filtered = df[df["strategy"] == strategy]
+            dist_test(df_filtered, levels="algorithm") 
+            print("StatiStatistics for strategy %s:" % (strategy))
+            print_statistics(df_filtered)
+    except Exception as e:
+        print("error: %s" % e)
 
 
 

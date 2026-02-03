@@ -1,0 +1,24 @@
+label,algorithm,strategy,delay,rate
+MB,P256_FALCON512,QBF,na,na
+Domain,Timestamp,Resolver,Status,Query Time
+test.example.local,Tue Jan 27 14:20:58 AEDT 2026,15.134.173.185#53,NOERROR,116
+test0.example.local,Tue Jan 27 14:20:58 AEDT 2026,15.134.173.185#53,NOERROR,57
+test1.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,62
+test2.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,56
+test3.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,52
+test4.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,56
+test5.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,55
+test6.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,54
+test7.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,60
+test8.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,57
+test9.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,57
+test10.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,63
+test11.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,58
+test12.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,59
+test13.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,60
+test14.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,58
+test15.example.local,Tue Jan 27 14:20:59 AEDT 2026,15.134.173.185#53,NOERROR,54
+test16.example.local,Tue Jan 27 14:21:00 AEDT 2026,15.134.173.185#53,NOERROR,93
+test17.example.local,Tue Jan 27 14:21:00 AEDT 2026,15.134.173.185#53,NOERROR,60
+test18.example.local,Tue Jan 27 14:21:00 AEDT 2026,15.134.173.185#53,NOERROR,63
+test19.example.local,Tue Jan 27 14:21:00 AEDT 2026,15.134.173.185#53,NOERROR,59

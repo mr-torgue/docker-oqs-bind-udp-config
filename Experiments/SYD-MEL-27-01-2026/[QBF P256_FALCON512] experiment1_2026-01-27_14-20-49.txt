@@ -1,0 +1,194 @@
+mrf@mrf:~/SSH PQC/docker-oqs-bind-udp-config/Experiments$ ./experiment1.sh 
+Algorithm is being used: P256_FALCON512
+Fragmentation strategy: QBF
+Delay: na
+Rate: na
+
+real	0m0.125s
+user	0m0.000s
+sys	0m0.009s
+Timestamp: Tue Jan 27 14:20:58 AEDT 2026
+Query Time: 116ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test0.example.local
+
+real	0m0.066s
+user	0m0.004s
+sys	0m0.005s
+Timestamp: Tue Jan 27 14:20:58 AEDT 2026
+Query Time: 57ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test1.example.local
+
+real	0m0.070s
+user	0m0.001s
+sys	0m0.007s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 62ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test2.example.local
+
+real	0m0.064s
+user	0m0.004s
+sys	0m0.004s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 56ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test3.example.local
+
+real	0m0.061s
+user	0m0.005s
+sys	0m0.003s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 52ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test4.example.local
+
+real	0m0.064s
+user	0m0.003s
+sys	0m0.005s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 56ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test5.example.local
+
+real	0m0.064s
+user	0m0.001s
+sys	0m0.008s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 55ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test6.example.local
+
+real	0m0.062s
+user	0m0.002s
+sys	0m0.006s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 54ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test7.example.local
+
+real	0m0.069s
+user	0m0.004s
+sys	0m0.004s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 60ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test8.example.local
+
+real	0m0.066s
+user	0m0.004s
+sys	0m0.004s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 57ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test9.example.local
+
+real	0m0.065s
+user	0m0.003s
+sys	0m0.005s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 57ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test10.example.local
+
+real	0m0.071s
+user	0m0.005s
+sys	0m0.004s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 63ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test11.example.local
+
+real	0m0.066s
+user	0m0.007s
+sys	0m0.001s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 58ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test12.example.local
+
+real	0m0.067s
+user	0m0.001s
+sys	0m0.007s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 59ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test13.example.local
+
+real	0m0.068s
+user	0m0.001s
+sys	0m0.007s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 60ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test14.example.local
+
+real	0m0.065s
+user	0m0.005s
+sys	0m0.003s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 58ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test15.example.local
+
+real	0m0.062s
+user	0m0.005s
+sys	0m0.003s
+Timestamp: Tue Jan 27 14:20:59 AEDT 2026
+Query Time: 54ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test16.example.local
+
+real	0m0.102s
+user	0m0.002s
+sys	0m0.006s
+Timestamp: Tue Jan 27 14:21:00 AEDT 2026
+Query Time: 93ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test17.example.local
+
+real	0m0.069s
+user	0m0.005s
+sys	0m0.003s
+Timestamp: Tue Jan 27 14:21:00 AEDT 2026
+Query Time: 60ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test18.example.local
+
+real	0m0.070s
+user	0m0.003s
+sys	0m0.005s
+Timestamp: Tue Jan 27 14:21:00 AEDT 2026
+Query Time: 63ms
+Server: 15.134.173.185#53
+Status: NOERROR
+test19.example.local
+
+real	0m0.068s
+user	0m0.004s
+sys	0m0.005s
+Timestamp: Tue Jan 27 14:21:00 AEDT 2026
+Query Time: 59ms
+Server: 15.134.173.185#53
+Status: NOERROR
+
