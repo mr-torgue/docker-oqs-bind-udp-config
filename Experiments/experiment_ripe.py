@@ -64,7 +64,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         ids = response["measurements"]
         print("Success! Saving %d ids %s to CSV!" % (len(ids), ids))
         print("Waiting for 60 seconds for results to come in...")
-        sleep(60)
+        sleep(60) # not great but should work
         get_measurements_with_metadata(ids, label, algorithm, strategy)
         get_results_with_metadata(ids, label, algorithm, strategy)
     else:
