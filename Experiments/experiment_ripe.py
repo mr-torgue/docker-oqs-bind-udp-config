@@ -94,7 +94,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             #atlas_stream.subscribe(stream_type="measurement", **stream_parameters)
 
         # wait for up to 60 seconds
-        atlas_stream.timeout(seconds=5)
+        atlas_stream.timeout(seconds=60)
         atlas_stream.disconnect()
     else:
         print("Request failed: %s" % (response))
