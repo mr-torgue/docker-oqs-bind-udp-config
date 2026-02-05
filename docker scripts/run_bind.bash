@@ -61,7 +61,7 @@ if [[ "$choice" =~ ^[Yy]$ ]]; then
         tcpdump -i any -w /tmp/$ALG-ns-root.pcap &
         gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
     else
-        named -g -d 3
+        named -d 3
     fi
 else
     echo "aborting..."
