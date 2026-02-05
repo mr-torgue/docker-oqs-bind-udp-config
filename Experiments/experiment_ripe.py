@@ -47,6 +47,8 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             query_argument=newdomain,
             target=resolver,
             use_probe_resolver=False,
+            set_rd_bit=True,
+            set_nsid_bit=True,
             udp_payload_size=1232,
         ))
 
