@@ -33,7 +33,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             type="country",
             value=country,
             requested=nr_sources,
-            tags={"include":["system-ipv4-works"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
         )
     prefix, suffix = domain.split(".", 1)
     measurements=[]
