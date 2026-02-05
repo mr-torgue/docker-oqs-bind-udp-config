@@ -83,7 +83,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         ids = response["measurements"]
         print("Success! Saving %d ids %s to CSV!" % (len(ids), ids))
         atlas_stream = AtlasStream()
-        atlas_stream.connect(timeout=10)
+        atlas_stream.connect()
 
         # create callbacks
         atlas_stream.bind("atlas_result", on_result_response)
