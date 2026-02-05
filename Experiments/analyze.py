@@ -116,11 +116,13 @@ def dist_test(df, levels="both"):
     if levels is None:
         for _, row in df.iterrows():
             group_key = f"{row['strategy']}-{row['algorithm']}"
-            groups[group_key].append(row['Query Time'])
+            if isinstance(row['Query Time'], (int, float)) and not np.isnan(row['Query Time']):
+                groups[group_key].append(row['Query Time'])
     else:
         for _, row in df.iterrows():
             group_key = row[levels]
-            groups[group_key].append(row['Query Time'])
+            if isinstance(row['Query Time'], (int, float)) and not np.isnan(row['Query Time']):
+                groups[group_key].append(row['Query Time'])
 
     print(f"Performing ANOVA and Kruskal-Wallis tests grouped by '{levels}':")
     print(f"Found {len(groups)} groups: {list(groups.keys())}")
