@@ -88,13 +88,13 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         # create callbacks
         atlas_stream.bind("atlas_result", on_result_response)
         #atlas_stream.bind("atlas_measurement", on_measurement_response)
-        for id in ids:
-            stream_parameters = {"msm": id}
+        for _id in ids:
+            stream_parameters = {"msm": _id}
             atlas_stream.subscribe(stream_type="result", **stream_parameters)
             #atlas_stream.subscribe(stream_type="measurement", **stream_parameters)
 
         # wait for up to 60 seconds
-        atlas_stream.timeout(seconds=60)
+        atlas_stream.timeout(seconds=5)
         atlas_stream.disconnect()
     else:
         print("Request failed: %s" % (response))
