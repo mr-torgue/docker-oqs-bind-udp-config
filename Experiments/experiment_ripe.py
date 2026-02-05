@@ -12,31 +12,12 @@ from ripe.atlas.cousteau import (
   Dns,
   AtlasSource,
   AtlasCreateRequest,
-  AtlasLatestRequest,
-  AtlasStream
+  AtlasLatestRequest
 )
 from get_ripe_results import get_results_with_metadata, get_measurements_with_metadata
 
 load_dotenv()
 ATLAS_API_KEY = os.getenv("ATLAS_API_KEY")
-
-
-'''
-will be called for every incoming result
-Args is a tuple, so you should use args[0] to access the real message.
-'''
-def on_result_response(*args):
-    print("result")
-    print(args[0])
-
-'''
-will be called for every incoming measurement
-Args is a tuple, so you should use args[0] to access the real message.
-'''
-def on_measurement_response(*args):
-    print("measurement")
-    print(args[0])
-
 
 def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country):
     description = "%s {\"algorithm\": \"%s\", \"strategy\": \"%s\", \"label\": \"%s\"}" % (description, algorithm, strategy, label)
@@ -82,20 +63,10 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
     if is_success:
         ids = response["measurements"]
         print("Success! Saving %d ids %s to CSV!" % (len(ids), ids))
-        atlas_stream = AtlasStream()
-        atlas_stream.connect()
-
-        # create callbacks
-        atlas_stream.bind("atlas_result", on_result_response)
-        #atlas_stream.bind("atlas_measurement", on_measurement_response)
-        for _id in ids:
-            stream_parameters = {"msm": _id}
-            atlas_stream.subscribe(stream_type="result", **stream_parameters)
-            #atlas_stream.subscribe(stream_type="measurement", **stream_parameters)
-
-        # wait for up to 60 seconds
-        atlas_stream.timeout(seconds=60)
-        atlas_stream.disconnect()
+        print("Waiting for 60 seconds for results to come in...")
+        sleep(60)
+        get_measurements_with_metadata(ids, label, algorithm, strategy)
+        get_results_with_metadata(ids, label, algorithm, strategy)
     else:
         print("Request failed: %s" % (response))
         
