@@ -5,3 +5,4 @@ scipy
 ripe-atlas-cousteau
 dotenv
 scikit-posthocs
+dnspython

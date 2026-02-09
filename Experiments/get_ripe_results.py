@@ -1,6 +1,8 @@
 import argparse
 import json
 import pandas as pd
+import base64
+import dns.message
 
 from ripe.atlas.cousteau import (
   AtlasLatestRequest,
@@ -50,6 +52,19 @@ def parse_description(description):
 
     return algorithm, strategy, label
 
+'''
+parses the abuf if available so that we know the domain name and rcode
+'''
+def parse_dns_message(encoded_msg):
+    try:
+        binary_msg = base64.b64decode(encoded_msg)
+        msg = dns.message.from_wire(binary_msg)
+        qname = msg.question[0].name.to_text() if msg.question else None
+        rcode = msg.rcode() if msg.flags else None
+        return qname, rcode
+    except Exception as e:
+        print(f"Error parsing message: {e}")
+        return None, None
 
 '''
 Our experiments can consist of multiple measurements.
@@ -98,7 +113,10 @@ def get_results_with_metadata(ids, label, algorithm, strategy, write_to_csv=True
             print("No results for id %d!" % (id))
         elif is_success:
             df = pd.DataFrame(pd.json_normalize(results))
-            print(df)
+            # add qname and rcode
+            df[['qname', 'rcode']] = df["result.abuf"].apply(
+                lambda x: pd.Series(parse_dns_message(x))
+            )
             df = df.assign(algorithm="%s" % (algorithm))
             df = df.assign(strategy="%s" % (strategy))
             df = df.assign(label="%s" % (label))
@@ -165,6 +183,10 @@ def get_results(ids, write_to_csv=True):
             if algorithm == "" or strategy == "":
                 print("We expect 'algorithm' and 'strategy' to be set in the tags!")
                 return None
+            # add qname and rcode
+            df[['qname', 'rcode']] = df["result.abuf"].apply(
+                lambda x: pd.Series(parse_dns_message(x))
+            )
             # add columns
             df = df.assign(algorithm="%s" % (algorithm))
             df = df.assign(strategy="%s" % (strategy))

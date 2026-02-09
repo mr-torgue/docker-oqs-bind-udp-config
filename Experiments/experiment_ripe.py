@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from ripe.atlas.cousteau import (
   Dns,
+  Measurement,
   AtlasSource,
   AtlasCreateRequest,
   AtlasLatestRequest
@@ -19,14 +20,20 @@ from get_ripe_results import get_results_with_metadata, get_measurements_with_me
 load_dotenv()
 ATLAS_API_KEY = os.getenv("ATLAS_API_KEY")
 
-def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country):
+def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id):
     description = "%s {\"algorithm\": \"%s\", \"strategy\": \"%s\", \"label\": \"%s\"}" % (description, algorithm, strategy, label)
-    if country == "WW":
+    if reuse_probes_msm_id > 0:
+        source = AtlasSource(
+            type="msm",
+            value=reuse_probes_msm_id,
+            requested=0
+        )
+    elif country == "WW":
         source = AtlasSource(
             type="area",
             value="WW",
             requested=nr_sources,
-            tags={"include":["system-ipv4-works"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
         )
     else:
         source = AtlasSource(
@@ -90,6 +97,7 @@ def main():
     parser.add_argument("-n", "--nr_sources", type=int, help="Number of sources (default: 5)", default=5)
     parser.add_argument("-q", "--nr_queries", type=int, help="Number of queries (default: 20)", default=20)
     parser.add_argument("-f", "--frequency", type=int, help="Frequency in seconds (default: 0)", default=0)
+    parser.add_argument("--reuse_id", type=int, help="Reuses probes from this measurement (default: 0)", default=0)
     parser.add_argument("--start_date", help="Start date (default: now)", default=datetime.now().isoformat())
     parser.add_argument("--end_date", help="End date (default: now + 1 day)", default=(datetime.now() + timedelta(days=1)).isoformat())
 
@@ -107,6 +115,7 @@ def main():
     print(f"  Country:     {args.country}")
     print(f"  Nr. Sources: {args.nr_sources}")
     print(f"  Nr. Queries: {args.nr_queries}")
+    print(f"  Probes Measurement ID: {args.reuse_id}")
     if args.frequency > 0:
         print(f"  Frequency:   {args.frequency}")
         print(f"  Start Date:  {args.start_date}")
@@ -125,7 +134,8 @@ def main():
             label=args.label,
             algorithm=args.algorithm,
             strategy=args.strategy,
-            country=args.country
+            country=args.country,
+            reuse_probes_msm_id=args.reuse_id
         )
     else:
         print("Experiment cancelled by user")
