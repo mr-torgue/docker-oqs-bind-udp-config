@@ -9,7 +9,7 @@ RUN apt install valgrind nano gdb tcpdump ssh curl cmake gcc pkg-config autoconf
 WORKDIR /
 RUN curl -O https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz
 RUN tar xf binutils-2.45.tar.xz
-RUN cd binutils-2.45
+WORKDIR binutils-2.45
 RUN ./configure
 RUN make
 RUN sudo make install
