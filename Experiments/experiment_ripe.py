@@ -4,6 +4,7 @@ Sends 25 requests for test%d.example.local
 
 import os
 import argparse
+import dns.resolver
 
 from time import sleep
 from dotenv import load_dotenv
@@ -44,6 +45,19 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         )
     prefix, suffix = domain.split(".", 1)
     measurements=[]
+    # add domain, we can exclude it later (for caching)
+    measurements.append(Dns(
+        af=4,
+        description=description,
+        query_class="IN",
+        query_type="A",
+        query_argument=domain,
+        target=resolver,
+        use_probe_resolver=False,
+        set_rd_bit=True,
+        set_nsid_bit=True,
+        udp_payload_size=1232,
+    ))
     for i in range(nr_queries):
         newdomain = "%s%d.%s" % (prefix, i, suffix)
         measurements.append(Dns(
@@ -125,18 +139,25 @@ def main():
     # Ask user to confirm
     user_input = input("Press Y/y to confirm and run the experiment: ")
     if user_input.lower() == 'y':
-        run_experiment(
-            nr_sources=args.nr_sources,
-            nr_queries=args.nr_queries,
-            resolver=args.resolver,
-            domain=args.domain,
-            description=args.description,
-            label=args.label,
-            algorithm=args.algorithm,
-            strategy=args.strategy,
-            country=args.country,
-            reuse_probes_msm_id=args.reuse_id
-        )
+        
+        try:
+            # resolve so that the ns can be cached
+            dns.resolver.resolve(args.domain, 'A')
+            sleep(1)
+            run_experiment(
+                nr_sources=args.nr_sources,
+                nr_queries=args.nr_queries,
+                resolver=args.resolver,
+                domain=args.domain,
+                description=args.description,
+                label=args.label,
+                algorithm=args.algorithm,
+                strategy=args.strategy,
+                country=args.country,
+                reuse_probes_msm_id=args.reuse_id
+            )
+        except Exception as e:
+            print(f"  DNS Resolution failed: {e}")
     else:
         print("Experiment cancelled by user")
 
