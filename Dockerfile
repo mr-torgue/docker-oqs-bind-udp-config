@@ -12,7 +12,7 @@ RUN tar xf binutils-2.45.tar.xz
 WORKDIR binutils-2.45
 RUN ./configure
 RUN make
-RUN sudo make install
+RUN make install
 # Install OpenSSL 3.2.5
 WORKDIR /
 RUN curl -L -O https://github.com/openssl/openssl/releases/download/openssl-3.2.5/openssl-3.2.5.tar.gz
