@@ -27,7 +27,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         source = AtlasSource(
             type="msm",
             value=reuse_probes_msm_id,
-            requested=0
+            requested=nr_sources
         )
     elif country == "WW":
         source = AtlasSource(
