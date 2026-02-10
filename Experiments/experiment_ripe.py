@@ -142,7 +142,7 @@ def main():
         
         try:
             # resolve so that the ns can be cached
-            dns.resolver.resolve(args.domain, 'A')
+            dns.resolver.resolve(args.domain, 'A', nameservers=[args.resolver])
             sleep(1)
             run_experiment(
                 nr_sources=args.nr_sources,
