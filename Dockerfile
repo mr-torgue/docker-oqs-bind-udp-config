@@ -46,7 +46,7 @@ RUN git clone https://github.com/mr-torgue/OQS-bind.git --branch v1.2.1
 WORKDIR OQS-bind
 RUN autoreconf -fi
 # For debugging: remove in production
-RUN CFLAGS="$CFLAGS -O0 -pg" ./configure
+RUN CFLAGS="$CFLAGS -O0 -g" ./configure
 RUN make
 RUN make install
 RUN mkdir /usr/local/etc/bind

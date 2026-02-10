@@ -24,7 +24,7 @@ git checkout $release
 git pull
 autoreconf -fi
 if [ "$debug" = true ]; then
-    CFLAGS="$CFLAGS -O0 -pg" ./configure
+    CFLAGS="$CFLAGS -O0 -g" ./configure
 else
     CFLAGS="$CFLAGS" ./configure
 fi
