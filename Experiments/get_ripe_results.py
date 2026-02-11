@@ -15,7 +15,7 @@ from collections import namedtuple
 '''
 writes the file to a CSV
 '''
-def save_to_csv(csv, label, strategy, algorithm):
+def save_to_csv(csv, timestamp, label, strategy, algorithm):
     filename = ""
     if label != "":
         filename = "%s%s-" % (filename, label)
@@ -23,7 +23,6 @@ def save_to_csv(csv, label, strategy, algorithm):
         filename = "%s%s-" % (filename, strategy)
     if algorithm != "":
         filename = "%s%s-" % (filename, algorithm)
-    timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = "%s%s.csv" % (filename, timestamp)
     with open(filename, 'w') as f:
         f.write(csv)
@@ -69,6 +68,7 @@ def parse_dns_message(encoded_msg):
 '''
 Our experiments can consist of multiple measurements.
 We assume that all measurements with the same label belong to the same experiment.
+Return dataframe for measurements and results.
 '''
 def get_results_from_label(label, write_to_csv=True):
     kwargs = {
@@ -82,28 +82,28 @@ def get_results_from_label(label, write_to_csv=True):
     print("Found %d results for label %s" % (response["count"], label))
     if results == []:
         print("No results for label %s!" % (label))
-        return None
+        return (None, None)
     elif is_success:
-        df = pd.DataFrame(pd.json_normalize(results))
-        df = df.assign(label="%s" % (label))
-        csv = df.to_csv(index=False)
-        if write_to_csv:
-            save_to_csv(csv, "measurements-%s" % (label), "", "")
-        ids = df["id"].astype(int).tolist()
-        print("Saving results for measurements ids %s" % (ids))
-        get_results(ids)
-        return csv
+        df_measurements = pd.DataFrame(pd.json_normalize(results))
+        df_measurements = df_measurements.assign(label="%s" % (label))
+        ids = df_measurements["id"].astype(int).tolist()
+        df_results = get_results(ids)
+        return (df_measurements, df_results)
     else:
         print("Failed to fetch results")
-        return None
+        return (None, None)
 
 '''
 same as get_results, but this time we already know the metadata
 assumption: all ids have the same label, algorithm, and strategy
 '''
-def get_results_with_metadata(ids, label, algorithm, strategy, write_to_csv=True):
+def get_results_with_metadata(ids, label, algorithm, strategy):
     dfs = []
-    print(ids)
+    df_measurements = get_measurements_with_metadata(ids, label)
+    if df_measurements == None:
+        print("Could not find measurements")
+        return (None, None)
+
     for id in ids:
         kwargs = {
             "msm_id": id,
@@ -111,6 +111,7 @@ def get_results_with_metadata(ids, label, algorithm, strategy, write_to_csv=True
         is_success, results = AtlasLatestRequest(**kwargs).create()
         if results == []:
             print("No results for id %d!" % (id))
+            return None
         elif is_success:
             df = pd.DataFrame(pd.json_normalize(results))
             # add qname and rcode
@@ -123,22 +124,19 @@ def get_results_with_metadata(ids, label, algorithm, strategy, write_to_csv=True
             dfs.append(df)
         else:
             print("Could not fetch measurement %d" % (id))
+            return (df_measurements, None)
     if dfs != []:
         # concate all dataframes
-        df = pd.concat([x for x in dfs], ignore_index=True)
-        # convert to CSV
-        csv = df.to_csv(index=False)
-        if write_to_csv:
-            save_to_csv(csv, label, algorithm, strategy)
-        return csv
+        df_results = pd.concat([x for x in dfs], ignore_index=True)
+        return (df_measurements, df_results)
     else:
         print("No results!")
-        return None
+        return (df_measurements, None)
 
 '''
-saves measurement information to a CSV
+gets the measurement information for given ids
 '''
-def get_measurements_with_metadata(ids, label, algorithm, strategy, write_to_csv=True):
+def get_measurements_with_metadata(ids, label):
     kwargs = {
         "id": ", ".join([str(x) for x in ids])
     }
@@ -150,13 +148,13 @@ def get_measurements_with_metadata(ids, label, algorithm, strategy, write_to_csv
     if results == []:
         print("No results for ids %s!" % (ids))
         return None
+    elif len(ids) != response["count"]:
+        print("len(ids) (%d) != response["count"] (%d)" % (len(ids), response["count"]))
+        return None
     elif is_success:
         df = pd.DataFrame(pd.json_normalize(results))
         df = df.assign(label="%s" % (label))
-        csv = df.to_csv(index=False)
-        if write_to_csv:
-            save_to_csv(csv, "measurements-%s" % (label), algorithm, strategy)
-        return csv
+        return df
     else:
         print("Failed to fetch results")
         return None
@@ -166,8 +164,12 @@ get all the results based on the measurements specified in ids
 only works if the description contains a json part with {"algorithm": x, "strategy": y, "label": z}
 outputs as a single CSV (no label, strategy, or algorithm)
 '''
-def get_results(ids, write_to_csv=True):
+def get_results(ids):
     dfs = []
+    df_measurements = get_measurements_with_metadata(ids, "")
+    if df_measurements == None:
+        print("Could not find measurements")
+        return (None, None)
     for id in ids:
         kwargs = {
             "msm_id": id,
@@ -197,11 +199,7 @@ def get_results(ids, write_to_csv=True):
     if dfs != []:
         # concate all dataframes
         df = pd.concat([x for x in dfs], ignore_index=True)
-        # convert to CSV
-        csv = df.to_csv(index=False)
-        if write_to_csv:
-            save_to_csv(csv, "", "", "")
-        return csv
+        return df
     else:
         print("No results!")
         return None
@@ -215,11 +213,25 @@ def main():
     args = parser.parse_args()
 
     # no check at the moment
+    timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
+    label = ""
+    algorithm = ""
+    strategy = ""
     if args.ids:
         ids = [int(x.strip()) for x in args.ids.split(",")]
-        csv_data = get_results(ids, args.csv)
+        (df_measurements, df_results) = get_results(ids, args.csv)
     else:
-        csv_data = get_results_from_label(args.label, args.csv)
+        (df_measurements, df_results) = get_results_from_label(args.label, args.csv)
+        label = args.label
+
+    if df_measurements != None and args.csv:
+        print("Collected measurement metadata, writing to csv file...")
+        csv = df_measurements.to_csv(index=False)
+        save_to_csv(csv, timestamp, label, strategy, algorithm)
+    if df_results != None and args.csv:
+        print("Collected results, writing to csv file...")
+        csv = df_results.to_csv(index=False)
+        save_to_csv(csv, timestamp, label, strategy, algorithm)
 
     if not csv_data:
         print("No CSV generated!")
