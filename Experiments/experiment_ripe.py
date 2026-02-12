@@ -24,8 +24,14 @@ ATLAS_API_KEY = os.getenv("ATLAS_API_KEY")
 '''
 run a measurement, wait until the results are in, and return results
 '''
-def run_measurement(nr_sources, resolver, domain, description, country, reuse_probes_msm_id):
-    if reuse_probes_msm_id > 0:
+def run_measurement(nr_sources, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id, probes):
+    if len(probes) > 0:
+        source = AtlasSource(
+            type="probes",
+            value=",".join(probes),
+            requested=len(probes)
+        )
+    elif reuse_probes_msm_id > 0:
         source = AtlasSource(
             type="msm",
             value=reuse_probes_msm_id,
@@ -79,8 +85,8 @@ def run_measurement(nr_sources, resolver, domain, description, country, reuse_pr
             counter += 1
     else:
         print("Request failed: %s" % (response))
-        return (None, None)
-    return (df_measurements, df_results)
+        return (None, None, None)
+    return (df_measurements, df_results, ids)
 
 
 '''
@@ -88,24 +94,39 @@ runs the experiments but waits for each measurement to complete before starting 
 prevents that the servers need to handle more than one request at a time
 when one-by-one is true, it only does measurements with 1 probe at a time
 '''
-def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id, one_by_one=True):
+def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id=0, probes=[], one_by_one=True):
     description = "%s {\"algorithm\": \"%s\", \"strategy\": \"%s\", \"label\": \"%s\"}" % (description, algorithm, strategy, label)
     dfs_measurements = []
     dfs_results = []
     delta = nr_queries
+    if probes != [] and len(probes) != nr_sources:
+        print("When providing probes, make sure they equal nr_sources!")
+        return
     if one_by_one:
         delta = 1
     for i in range(0, nr_sources, delta):
-        (df_measurements, df_results) = run_measurement(delta, resolver, domain, description, country, reuse_probes_msm_id)
-        if df_measurements is None or df_results is None:
+        # sel_probes is the same as probes if one_by_one is false
+        # if one_by_one is true, we try to select probes[i]
+        sel_probes = []
+        if one_by_one:
+            try:
+                sel_probes.append(probes[i])
+            except:
+                None
+        else:
+            sel_probes = probes
+        (df_measurements, df_results, ids) = run_measurement(delta, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id, sel_probes)
+        if df_measurements is None or df_results is None or len(ids) != 1:
             print("dataframes should not be empty")
             return
+        # to make sure we use the same probe for future measurements
+        reuse_msm_id = ids[0]
         dfs_measurements.append(df_measurements)
         dfs_results.append(df_results)
         prefix, suffix = domain.split(".", 1)
         for i in range(nr_queries):
             newdomain = "%s%d.%s" % (prefix, i, suffix)
-            (df_measurements, df_results) = run_measurement(delta, resolver, newdomain, description, country, reuse_probes_msm_id)
+            (df_measurements, df_results, ids) = run_measurement(delta, resolver, newdomain, description, label, algorithm, strategy, country, reuse_msm_id, sel_probes)
             if df_measurements is None or df_results is None:
                 print("dataframes should not be empty")
                 return
@@ -122,9 +143,22 @@ def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, l
     csv = df_results.to_csv(index=False)
     save_to_csv(csv, timestamp, label, strategy, algorithm)
 
-def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id):
+'''
+runs the experiment
+in order of preference uses the following probes:
+1. specified by `probes` array
+2. reuses probes used in measurement `reuse_probes_msm_id`
+3. randomly selects probes from given country
+'''
+def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id=0, probes=[]):
     description = "%s {\"algorithm\": \"%s\", \"strategy\": \"%s\", \"label\": \"%s\"}" % (description, algorithm, strategy, label)
-    if reuse_probes_msm_id > 0:
+    if len(probes) > 0:
+        source = AtlasSource(
+            type="probes",
+            value=",".join(probes),
+            requested=len(probes)
+        )
+    elif reuse_probes_msm_id > 0:
         source = AtlasSource(
             type="msm",
             value=reuse_probes_msm_id,
