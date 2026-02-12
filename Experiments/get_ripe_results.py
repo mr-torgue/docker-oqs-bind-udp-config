@@ -110,7 +110,7 @@ def get_results_with_metadata(ids, label, algorithm, strategy):
         is_success, results = AtlasLatestRequest(**kwargs).create()
         if results == []:
             print("No results for id %d!" % (id))
-            return None
+            return (None, None)
         elif is_success:
             df = pd.DataFrame(pd.json_normalize(results))
             # add qname and rcode
