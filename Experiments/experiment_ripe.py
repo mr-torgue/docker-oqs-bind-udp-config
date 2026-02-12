@@ -80,7 +80,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
             print("No results, waiting for 10 seconds...")
             sleep(10)
             (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
-            if df_measurements is None and df_results is None:
+            if df_measurements is not None and df_results is not None:
                 break
             counter += 1
     else:
