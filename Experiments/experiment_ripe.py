@@ -30,7 +30,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
         print("Using %d probes from list %s" % (nr_sources, probes))
         source = AtlasSource(
             type="probes",
-            value=",".join(probes),
+            value=",".join(map(str, probes)),
             requested=len(probes)
         )
     elif reuse_probes_msm_id > 0:
