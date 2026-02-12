@@ -314,7 +314,7 @@ def main():
                     algorithm=args.algorithm,
                     strategy=args.strategy,
                     country=args.country,
-                    reuse_probes_msm_id=args.reuse_id
+                    reuse_probes_msm_id=args.reuse_id,
                     probes=probe_ids
                 )
             else:
