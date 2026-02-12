@@ -41,7 +41,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
             requested=nr_sources
         )
     elif country == "WW":
-        print("Using %d random probes from country %s" % (nr_sources, country))
+        print("Using %d random probes world-wide" % (nr_sources))
         source = AtlasSource(
             type="area",
             value="WW",
@@ -49,7 +49,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
             tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
         )
     else:
-        print("Using %d random probes world-wide" % (nr_sources))
+        print("Using %d random probes from country %s" % (nr_sources, country))
         source = AtlasSource(
             type="country",
             value=country,
@@ -81,9 +81,9 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
         print("Success! Collecting results for %s!" % (ids))
         counter = 0 
         # add counter to prevent loops
-        while True and counter < 9:
-            print("No results, waiting for 10 seconds...")
-            sleep(10)
+        while True and counter < 20:
+            print("No results, waiting for 5 seconds...")
+            sleep(5)
             (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
             if df_measurements is not None and df_results is not None:
                 break
@@ -226,9 +226,9 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         ids = response["measurements"]
         print("Success! Saving %d ids %s to CSV!" % (len(ids), ids))
         counter = 0
-        while True and counter < 9:
-            print("Waiting for 10 seconds for results to come in...")
-            sleep(10) # not great but should work
+        while True and counter < 20:
+            print("Waiting for 5 seconds for results to come in...")
+            sleep(5) # not great but should work
             (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
             if df_measurements != None and df_results != None:
                 timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
