@@ -5,6 +5,7 @@ Sends 25 requests for test%d.example.local
 import os
 import argparse
 import dns.resolver
+import pandas as pd
 
 from time import sleep
 from dotenv import load_dotenv
@@ -26,18 +27,21 @@ run a measurement, wait until the results are in, and return results
 '''
 def run_measurement(nr_sources, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id, probes):
     if len(probes) > 0:
+        print("Using %d probes from list %s" % (nr_sources, probes))
         source = AtlasSource(
             type="probes",
             value=",".join(probes),
             requested=len(probes)
         )
     elif reuse_probes_msm_id > 0:
+        print("Using %d probes from measurement %d" % (nr_sources, reuse_probes_msm_id))
         source = AtlasSource(
             type="msm",
             value=reuse_probes_msm_id,
             requested=nr_sources
         )
     elif country == "WW":
+        print("Using %d random probes from country %s" % (nr_sources, country))
         source = AtlasSource(
             type="area",
             value="WW",
@@ -45,6 +49,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
             tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
         )
     else:
+        print("Using %d random probes world-wide" % (nr_sources))
         source = AtlasSource(
             type="country",
             value=country,
@@ -104,6 +109,7 @@ def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, l
         return
     if one_by_one:
         delta = 1
+    print("running experiments with delta %d" % (delta))
     for i in range(0, nr_sources, delta):
         # sel_probes is the same as probes if one_by_one is false
         # if one_by_one is true, we try to select probes[i]
@@ -255,6 +261,7 @@ def main():
     parser.add_argument("-q", "--nr_queries", type=int, help="Number of queries (default: 20)", default=20)
     parser.add_argument("-f", "--frequency", type=int, help="Frequency in seconds (default: 0)", default=0)
     parser.add_argument("--reuse_id", type=int, help="Reuses probes from this measurement (default: 0)", default=0)
+    parser.add_argument("--probes", type=str, help='Comma-separated list of Probe IDs to use')
     parser.add_argument("--start_date", help="Start date (default: now)", default=datetime.now().isoformat())
     parser.add_argument("--end_date", help="End date (default: now + 1 day)", default=(datetime.now() + timedelta(days=1)).isoformat())
 
@@ -274,6 +281,7 @@ def main():
     print(f"  Nr. Sources: {args.nr_sources}")
     print(f"  Nr. Queries: {args.nr_queries}")
     print(f"  Probes Measurement ID: {args.reuse_id}")
+    print(f"  Probe IDs: {args.probes}")
     if args.frequency > 0:
         print(f"  Frequency:   {args.frequency}")
         print(f"  Start Date:  {args.start_date}")
@@ -290,6 +298,11 @@ def main():
             custom_resolver.nameservers = [args.resolver]
             custom_resolver.resolve(args.domain, 'A')
             sleep(1)
+            probe_ids = []
+            try:
+                probe_ids = [int(x.strip()) for x in args.probes.split(",")]
+            except:
+                None
             if args.wait:
                 run_experiment_wait(
                     nr_sources=args.nr_sources,
@@ -302,6 +315,7 @@ def main():
                     strategy=args.strategy,
                     country=args.country,
                     reuse_probes_msm_id=args.reuse_id
+                    probes=probe_ids
                 )
             else:
                 run_experiment(
@@ -314,7 +328,8 @@ def main():
                     algorithm=args.algorithm,
                     strategy=args.strategy,
                     country=args.country,
-                    reuse_probes_msm_id=args.reuse_id
+                    reuse_probes_msm_id=args.reuse_id,
+                    probes=probe_ids
                 )
         except Exception as e:
             print(f"  DNS Resolution failed: {e}")
