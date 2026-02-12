@@ -87,8 +87,7 @@ def get_results_from_label(label, write_to_csv=True):
         df_measurements = pd.DataFrame(pd.json_normalize(results))
         df_measurements = df_measurements.assign(label="%s" % (label))
         ids = df_measurements["id"].astype(int).tolist()
-        df_results = get_results(ids)
-        return (df_measurements, df_results)
+        return get_results(ids)
     else:
         print("Failed to fetch results")
         return (None, None)
