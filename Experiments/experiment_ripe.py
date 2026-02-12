@@ -17,7 +17,7 @@ from ripe.atlas.cousteau import (
   AtlasCreateRequest,
   AtlasLatestRequest
 )
-from get_ripe_results import get_results_with_metadata, get_measurements_with_metadata
+from get_ripe_results import get_results_with_metadata, get_measurements_with_metadata, save_to_csv
 
 load_dotenv()
 ATLAS_API_KEY = os.getenv("ATLAS_API_KEY")
