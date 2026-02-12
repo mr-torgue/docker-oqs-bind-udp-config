@@ -297,42 +297,42 @@ def main():
             custom_resolver = dns.resolver.Resolver()
             custom_resolver.nameservers = [args.resolver]
             custom_resolver.resolve(args.domain, 'A')
-            sleep(1)
-            probe_ids = []
-            try:
-                probe_ids = [int(x.strip()) for x in args.probes.split(",")]
-            except:
-                None
-            if args.wait:
-                run_experiment_wait(
-                    nr_sources=args.nr_sources,
-                    nr_queries=args.nr_queries,
-                    resolver=args.resolver,
-                    domain=args.domain,
-                    description=args.description,
-                    label=args.label,
-                    algorithm=args.algorithm,
-                    strategy=args.strategy,
-                    country=args.country,
-                    reuse_probes_msm_id=args.reuse_id,
-                    probes=probe_ids
-                )
-            else:
-                run_experiment(
-                    nr_sources=args.nr_sources,
-                    nr_queries=args.nr_queries,
-                    resolver=args.resolver,
-                    domain=args.domain,
-                    description=args.description,
-                    label=args.label,
-                    algorithm=args.algorithm,
-                    strategy=args.strategy,
-                    country=args.country,
-                    reuse_probes_msm_id=args.reuse_id,
-                    probes=probe_ids
-                )
         except Exception as e:
             print(f"  DNS Resolution failed: {e}")
+        sleep(1)
+        probe_ids = []
+        try:
+            probe_ids = [int(x.strip()) for x in args.probes.split(",")]
+        except:
+            None
+        if args.wait:
+            run_experiment_wait(
+                nr_sources=args.nr_sources,
+                nr_queries=args.nr_queries,
+                resolver=args.resolver,
+                domain=args.domain,
+                description=args.description,
+                label=args.label,
+                algorithm=args.algorithm,
+                strategy=args.strategy,
+                country=args.country,
+                reuse_probes_msm_id=args.reuse_id,
+                probes=probe_ids
+            )
+        else:
+            run_experiment(
+                nr_sources=args.nr_sources,
+                nr_queries=args.nr_queries,
+                resolver=args.resolver,
+                domain=args.domain,
+                description=args.description,
+                label=args.label,
+                algorithm=args.algorithm,
+                strategy=args.strategy,
+                country=args.country,
+                reuse_probes_msm_id=args.reuse_id,
+                probes=probe_ids
+            )
     else:
         print("Experiment cancelled by user")
 
