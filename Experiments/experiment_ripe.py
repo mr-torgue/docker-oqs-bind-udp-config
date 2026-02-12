@@ -21,6 +21,107 @@ from get_ripe_results import get_results_with_metadata, get_measurements_with_me
 load_dotenv()
 ATLAS_API_KEY = os.getenv("ATLAS_API_KEY")
 
+'''
+run a measurement, wait until the results are in, and return results
+'''
+def run_measurement(nr_sources, resolver, domain, description, country, reuse_probes_msm_id):
+    if reuse_probes_msm_id > 0:
+        source = AtlasSource(
+            type="msm",
+            value=reuse_probes_msm_id,
+            requested=nr_sources
+        )
+    elif country == "WW":
+        source = AtlasSource(
+            type="area",
+            value="WW",
+            requested=nr_sources,
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
+        )
+    else:
+        source = AtlasSource(
+            type="country",
+            value=country,
+            requested=nr_sources,
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
+        )
+    measurement = Dns(
+        af=4,
+        description=description,
+        query_class="IN",
+        query_type="A",
+        query_argument=domain,
+        target=resolver,
+        use_probe_resolver=False,
+        set_rd_bit=True,
+        set_nsid_bit=True,
+        udp_payload_size=1232,
+    )
+    # send request
+    atlas_request = AtlasCreateRequest(
+        key=ATLAS_API_KEY,
+        measurements=[measurement],
+        sources=[source],
+        is_oneoff=True
+    )
+    (is_success, response) = atlas_request.create()
+    if is_success:
+        ids = response["measurements"]
+        print("Success! Collecting results for %s!" % (ids))
+        counter = 0 
+        # add counter to prevent loops
+        while True and counter < 9:
+            print("No results, waiting for 10 seconds...")
+            sleep(10)
+            (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
+            if df_measurements != None and df_results != None:
+                break
+            counter += 1
+    else:
+        print("Request failed: %s" % (response))
+        return (None, None)
+    return (df_measurements, df_results)
+
+
+'''
+runs the experiments but waits for each measurement to complete before starting the next one
+prevents that the servers need to handle more than one request at a time
+when one-by-one is true, it only does measurements with 1 probe at a time
+'''
+def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id, one_by_one=True):
+    description = "%s {\"algorithm\": \"%s\", \"strategy\": \"%s\", \"label\": \"%s\"}" % (description, algorithm, strategy, label)
+    dfs_measurements = []
+    dfs_results = []
+    delta = nr_queries
+    if one_by_one:
+        delta = 1
+    for i in range(0, nr_sources, delta):
+        (df_measurements, df_results) = run_measurement(delta, resolver, domain, description, country, reuse_probes_msm_id)
+        if df_measurements == None or df_results == None:
+            print("dataframes should not be empty")
+            return
+        dfs_measurements.append(df_measurements)
+        dfs_results.append(df_results)
+        prefix, suffix = domain.split(".", 1)
+        for i in range(nr_queries):
+            newdomain = "%s%d.%s" % (prefix, i, suffix)
+            (df_measurements, df_results) = run_measurement(delta, resolver, newdomain, description, country, reuse_probes_msm_id)
+            if df_measurements == None or df_results == None:
+                print("dataframes should not be empty")
+                return
+            dfs_measurements.append(df_measurements)
+            dfs_results.append(df_results)
+    # combine all the dataframes and write it to a CSV file
+    timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
+    # save measurements
+    df_measurements = pd.concat([x for x in dfs_measurements], ignore_index=True)
+    csv = df_measurements.to_csv(index=False)
+    save_to_csv(csv, timestamp, "measurements-%s" % label, strategy, algorithm)
+    # save results
+    df_results = pd.concat([x for x in dfs_results], ignore_index=True)
+    csv = df_results.to_csv(index=False)
+    save_to_csv(csv, timestamp, label, strategy, algorithm)
+
 def run_experiment(nr_sources, nr_queries, resolver, domain, description, label, algorithm, strategy, country, reuse_probes_msm_id):
     description = "%s {\"algorithm\": \"%s\", \"strategy\": \"%s\", \"label\": \"%s\"}" % (description, algorithm, strategy, label)
     if reuse_probes_msm_id > 0:
@@ -84,14 +185,21 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
     if is_success:
         ids = response["measurements"]
         print("Success! Saving %d ids %s to CSV!" % (len(ids), ids))
-        print("Waiting for 60 seconds for results to come in...")
-        sleep(60) # not great but should work
-        get_measurements_with_metadata(ids, label, algorithm, strategy)
-        get_results_with_metadata(ids, label, algorithm, strategy)
+        counter = 0
+        while True and counter < 9:
+            print("Waiting for 10 seconds for results to come in...")
+            sleep(10) # not great but should work
+            (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
+            if df_measurements != None and df_results != None:
+                timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
+                csv = df_measurements.to_csv(index=False)
+                save_to_csv(csv, timestamp, label, strategy, algorithm)
+                csv = df_results.to_csv(index=False)
+                save_to_csv(csv, timestamp, label, strategy, algorithm)
+                break
+            counter += 1
     else:
         print("Request failed: %s" % (response))
-        
-
 
 def main():
 
@@ -108,6 +216,7 @@ def main():
     # Optional arguments
     parser.add_argument("-d", "--description", help="Description for the query (default: [Hydra DNS])", default="[Hydra DNS]")
     parser.add_argument("-c", "--country", help="Country code (default: WW)", default="WW")
+    parser.add_argument("-w", "--wait", action="store_true", help="Indicates if we should wait for measurements or not (default: False)")
     parser.add_argument("-n", "--nr_sources", type=int, help="Number of sources (default: 5)", default=5)
     parser.add_argument("-q", "--nr_queries", type=int, help="Number of queries (default: 20)", default=20)
     parser.add_argument("-f", "--frequency", type=int, help="Frequency in seconds (default: 0)", default=0)
@@ -127,6 +236,7 @@ def main():
     print(f"  Strategy:    {args.strategy}")
     print(f"  Domain:      {args.domain}")
     print(f"  Country:     {args.country}")
+    print(f"  Wait for measurements to finish:        {args.wait}")
     print(f"  Nr. Sources: {args.nr_sources}")
     print(f"  Nr. Queries: {args.nr_queries}")
     print(f"  Probes Measurement ID: {args.reuse_id}")
@@ -146,18 +256,32 @@ def main():
             custom_resolver.nameservers = [args.resolver]
             custom_resolver.resolve(args.domain, 'A')
             sleep(1)
-            run_experiment(
-                nr_sources=args.nr_sources,
-                nr_queries=args.nr_queries,
-                resolver=args.resolver,
-                domain=args.domain,
-                description=args.description,
-                label=args.label,
-                algorithm=args.algorithm,
-                strategy=args.strategy,
-                country=args.country,
-                reuse_probes_msm_id=args.reuse_id
-            )
+            if args.wait:
+                run_experiment_wait(
+                    nr_sources=args.nr_sources,
+                    nr_queries=args.nr_queries,
+                    resolver=args.resolver,
+                    domain=args.domain,
+                    description=args.description,
+                    label=args.label,
+                    algorithm=args.algorithm,
+                    strategy=args.strategy,
+                    country=args.country,
+                    reuse_probes_msm_id=args.reuse_id
+                )
+            else:
+                run_experiment(
+                    nr_sources=args.nr_sources,
+                    nr_queries=args.nr_queries,
+                    resolver=args.resolver,
+                    domain=args.domain,
+                    description=args.description,
+                    label=args.label,
+                    algorithm=args.algorithm,
+                    strategy=args.strategy,
+                    country=args.country,
+                    reuse_probes_msm_id=args.reuse_id
+                )
         except Exception as e:
             print(f"  DNS Resolution failed: {e}")
     else:

@@ -184,7 +184,7 @@ def get_results(ids):
             algorithm, strategy, label = parse_description(measurement.description)
             if algorithm == "" or strategy == "":
                 print("We expect 'algorithm' and 'strategy' to be set in the tags!")
-                return None
+                return (df_measurements, None)
             # add qname and rcode
             df[['qname', 'rcode']] = df["result.abuf"].apply(
                 lambda x: pd.Series(parse_dns_message(x))
@@ -198,11 +198,11 @@ def get_results(ids):
             print("Could not fetch measurement %d" % (id))
     if dfs != []:
         # concate all dataframes
-        df = pd.concat([x for x in dfs], ignore_index=True)
-        return df
+        df_results = pd.concat([x for x in dfs], ignore_index=True)
+        return (df_measurements, df_results)
     else:
         print("No results!")
-        return None
+        return (df_measurements, None)
 
 def main():
     parser = argparse.ArgumentParser(description='Fetch and save Atlas measurement results.')
@@ -227,7 +227,7 @@ def main():
     if df_measurements != None and args.csv:
         print("Collected measurement metadata, writing to csv file...")
         csv = df_measurements.to_csv(index=False)
-        save_to_csv(csv, timestamp, label, strategy, algorithm)
+        save_to_csv(csv, timestamp, "measurements-%s" % label, strategy, algorithm)
     if df_results != None and args.csv:
         print("Collected results, writing to csv file...")
         csv = df_results.to_csv(index=False)
