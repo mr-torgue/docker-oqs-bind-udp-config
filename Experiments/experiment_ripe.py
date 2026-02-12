@@ -74,7 +74,7 @@ def run_measurement(nr_sources, resolver, domain, description, country, reuse_pr
             print("No results, waiting for 10 seconds...")
             sleep(10)
             (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
-            if df_measurements != None and df_results != None:
+            if df_measurements is None and df_results is None:
                 break
             counter += 1
     else:
@@ -97,7 +97,7 @@ def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, l
         delta = 1
     for i in range(0, nr_sources, delta):
         (df_measurements, df_results) = run_measurement(delta, resolver, domain, description, country, reuse_probes_msm_id)
-        if df_measurements == None or df_results == None:
+        if df_measurements is None or df_results is None:
             print("dataframes should not be empty")
             return
         dfs_measurements.append(df_measurements)
@@ -106,7 +106,7 @@ def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, l
         for i in range(nr_queries):
             newdomain = "%s%d.%s" % (prefix, i, suffix)
             (df_measurements, df_results) = run_measurement(delta, resolver, newdomain, description, country, reuse_probes_msm_id)
-            if df_measurements == None or df_results == None:
+            if df_measurements is None or df_results is None:
                 print("dataframes should not be empty")
                 return
             dfs_measurements.append(df_measurements)

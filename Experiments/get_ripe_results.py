@@ -100,7 +100,7 @@ assumption: all ids have the same label, algorithm, and strategy
 def get_results_with_metadata(ids, label, algorithm, strategy):
     dfs = []
     df_measurements = get_measurements_with_metadata(ids, label)
-    if df_measurements == None:
+    if df_measurements is None:
         print("Could not find measurements")
         return (None, None)
 
@@ -149,7 +149,7 @@ def get_measurements_with_metadata(ids, label):
         print("No results for ids %s!" % (ids))
         return None
     elif len(ids) != response["count"]:
-        print("len(ids) (%d) != response["count"] (%d)" % (len(ids), response["count"]))
+        print("len(ids) (%d) != response[\"count\"] (%d)" % (len(ids), response["count"]))
         return None
     elif is_success:
         df = pd.DataFrame(pd.json_normalize(results))
@@ -167,7 +167,7 @@ outputs as a single CSV (no label, strategy, or algorithm)
 def get_results(ids):
     dfs = []
     df_measurements = get_measurements_with_metadata(ids, "")
-    if df_measurements == None:
+    if df_measurements is None:
         print("Could not find measurements")
         return (None, None)
     for id in ids:
@@ -224,17 +224,14 @@ def main():
         (df_measurements, df_results) = get_results_from_label(args.label, args.csv)
         label = args.label
 
-    if df_measurements != None and args.csv:
+    if df_measurements is not None and args.csv:
         print("Collected measurement metadata, writing to csv file...")
         csv = df_measurements.to_csv(index=False)
         save_to_csv(csv, timestamp, "measurements-%s" % label, strategy, algorithm)
-    if df_results != None and args.csv:
+    if df_results is not None and args.csv:
         print("Collected results, writing to csv file...")
         csv = df_results.to_csv(index=False)
         save_to_csv(csv, timestamp, label, strategy, algorithm)
-
-    if not csv_data:
-        print("No CSV generated!")
 
 if __name__ == "__main__":
     main()
