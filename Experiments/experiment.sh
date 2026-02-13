@@ -29,6 +29,7 @@ COUNT=20
 RATE=0
 DELAY=0
 REPEAT=1
+NR_PROCESSES=1
 
 # Help function
 usage() {
@@ -41,6 +42,7 @@ usage() {
     echo "  -d, --description Description for the query (default: \"\")"
     echo "  -a, --algorithm  Algorithm that is used (required)"
     echo "  -s, --strategy   Strategy that is used (required)"
+    echo "  -n, --processes  The number of processes (default: 1)"
     echo "  --domain         Domain to query (default: test.example.local)"
     echo "  --count          number of queries (default: 20)"
     echo "  --rate           Rate limit, docker only (default: 0)"
@@ -59,6 +61,7 @@ while [[ "$#" -gt 0 ]]; do
         -d|--description) DESCRIPTION="$2"; shift ;;
         -a|--algorithm) ALGORITHM="$2"; shift ;;
         -s|--strategy) STRATEGY="$2"; shift ;;
+        -n|--processes) NR_PROCESSES="$2"; shift ;;
         --domain) DOMAIN="$2"; shift ;;
         --count) COUNT="$2"; shift ;;
         --rate) RATE="$2"; shift ;;
@@ -84,6 +87,7 @@ echo "  Label:       $LABEL"
 echo "  Description: $DESCRIPTION"
 echo "  Algorithm:   $ALGORITHM"
 echo "  Strategy:    $STRATEGY"
+echo "  Processes:   $NR_PROCESSES"
 echo "  Domain:      $DOMAIN"
 echo "  Count:       $COUNT"
 echo "  Rate:        $RATE"
@@ -149,20 +153,44 @@ parse_dig_result() {
     printf "\"$domain\",\"$timestamp\",\"$server\",\"$status\",\"$query_time\"\n" >> "$CSV_FILE"
 }
 
+# Function to run a single dig query and process results
+run_query() {
+    local domain="$1"
+    local output
+    output=$((time dig @$RESOLVER -p $PORT +timeout=10 +tries=1 $domain) 2>&1)
+    printf "$output\n" >> "$TXT_FILE"
+    parse_dig_result "$output" "$domain"
+}
+
 # write the info to file
 printf "\"label\",\"description\",\"algorithm\",\"strategy\",\"delay\",\"rate\"\n" >> "$CSV_FILE"
 printf "\"$LABEL\",\"$DESCRIPTION\",\"$ALGORITHM\",\"$STRATEGY\",\"$DELAY\",\"$RATE\"\n" >> "$CSV_FILE"
 # write headers
 printf "\"Domain\",\"Timestamp\",\"Resolver\",\"Status\",\"Query Time\"\n" >> "$CSV_FILE"
-output=$((time dig @$RESOLVER -p $PORT +timeout=10 +tries=1 $DOMAIN) 2>&1)
-printf "$output\n" >> "$TXT_FILE"
-parse_dig_result "$output" "$DOMAIN"
+
+# Run initial query
+run_query "$DOMAIN"
+
+# Run concurrent queries
 for ((r = 0; r < REPEAT; r++)); do
+    # Create an array to hold PIDs
+    local pids=()
+
     for ((i = 0; i < COUNT; i++)); do 
         prefix="${DOMAIN%%.*}${i}"
         newdomain=$(echo "$prefix.${DOMAIN#*.}")
-        output=$((time dig @$RESOLVER -p $PORT +timeout=10 +tries=1 $newdomain) 2>&1)
-        printf "$output\n" >> "$TXT_FILE"
-        parse_dig_result "$output" "$newdomain"
+
+        # Run query in background and store PID
+        run_query "$newdomain" &
+        pids+=($!)
+
+        # Limit number of concurrent processes
+        if (( ${#pids[@]} >= NR_PROCESSES )); then
+            wait -n
+            pids=("${pids[@]:1}")
+        fi
     done
+
+    # Wait for all background processes to complete
+    wait
 done
