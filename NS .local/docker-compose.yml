@@ -17,14 +17,10 @@ services:
             - ./data:/tmp/
             - ./dsset-example.local.:/dsset-example.local.
         ports:
-            - "3053:53/tcp"
-            - "3053:53/udp"
+            - "53:53/tcp"
+            - "53:53/udp"
+            - "8053:8053/tcp"
+            - "8053:8053/udp"
         cap_add:
             - NET_ADMIN
-        networks:
-            bind9_net:
-                ipv4_address: 172.20.0.3
-
-networks:
-    bind9_net:
-        external: true
+        network_mode: host
