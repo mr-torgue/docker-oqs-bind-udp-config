@@ -28,10 +28,10 @@ cd openssl-3.2.5
 ./Configure
 make
 sudo make install
-sed -i 's/default = default_sect/default = default_sect\noqsprovider = oqsprovider_sect/' /usr/local/ssl/openssl.cnf
-echo -e "[oqsprovider_sect]\nactivate = 1" >> /usr/local/ssl/openssl.cnf
-echo "/usr/local/lib64" > /etc/ld.so.conf.d/openssl.conf
-ln -s /usr/local/lib64/libcrypto.so /usr/lib/x86_64-linux-gnu/libcrypto.so
+sudo sed -i 's/default = default_sect/default = default_sect\noqsprovider = oqsprovider_sect/' /usr/local/ssl/openssl.cnf
+sudo sh -c 'echo -e "[oqsprovider_sect]\nactivate = 1" >> /usr/local/ssl/openssl.cnf'
+echo "/usr/local/lib64" | sudo tee /etc/ld.so.conf.d/openssl.conf > /dev/null
+sudo ln -s /usr/local/lib64/libcrypto.so /usr/lib/x86_64-linux-gnu/libcrypto.so
 sudo ldconfig 
 # Install liboqs 0.14.0
 cd ~
