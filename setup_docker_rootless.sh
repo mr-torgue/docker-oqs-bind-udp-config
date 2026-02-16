@@ -52,7 +52,7 @@ docker network create --subnet=172.20.0.0/16 bind9_net
 
 # install monitoring if specified
 if [ "$INSTALL_MONITORING" = true ]; then
-sudo apt install prometheus prometheus-node-exporter prometheus-bind-exporter
+sudo apt install prometheus prometheus-node-exporter prometheus-bind-exporter -y
 sudo systemctl enable prometheus
 sudo systemctl start prometheus
 sudo systemctl start node_exporter
@@ -64,5 +64,5 @@ sudo mkdir -p /etc/apt/keyrings/
 wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
 echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 sudo apt-get update
-sudo apt-get install grafana
+sudo apt-get install grafana -y
 fi

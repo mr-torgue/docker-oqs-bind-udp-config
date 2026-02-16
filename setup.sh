@@ -11,7 +11,7 @@ done
 
 sudo apt update
 sudo apt upgrade -y
-sudo apt install valgrind nano gdb tcpdump ssh curl cmake gcc pkg-config autoconf automake git build-essential ninja-build libnghttp2-dev libcap-dev libtool libtool-bin libuv1-dev unzip iputils-ping iptables iproute2 liburcu-dev libnetfilter-queue-dev libpcap-dev net-tools netcat traceroute iperf libnl-3-dev libnl-genl-3-dev binutils-dev libreadline6-dev libjemalloc-dev libcmocka-dev libxml2-dev libjson-c-dev binutils -y
+sudo apt install valgrind nano gdb tcpdump ssh curl cmake gcc pkg-config autoconf automake git build-essential ninja-build libnghttp2-dev libcap-dev libtool libtool-bin libuv1-dev unzip iputils-ping iptables iproute2 liburcu-dev libnetfilter-queue-dev libpcap-dev net-tools traceroute iperf libnl-3-dev libnl-genl-3-dev binutils-dev libreadline6-dev libjemalloc-dev libcmocka-dev libxml2-dev libjson-c-dev binutils -y
 # Remove resolver and set 8.8.8.8 and 8.8.4.4 to ensure that we can still use DNS
 sudo systemctl stop systemd-resolved
 sudo systemctl disable systemd-resolved
@@ -32,7 +32,7 @@ sed -i 's/default = default_sect/default = default_sect\noqsprovider = oqsprovid
 echo -e "[oqsprovider_sect]\nactivate = 1" >> /usr/local/ssl/openssl.cnf
 echo "/usr/local/lib64" > /etc/ld.so.conf.d/openssl.conf
 ln -s /usr/local/lib64/libcrypto.so /usr/lib/x86_64-linux-gnu/libcrypto.so
-ldconfig 
+sudo ldconfig 
 # Install liboqs 0.14.0
 cd ~
 git clone https://github.com/open-quantum-safe/liboqs.git --branch 0.14.0
@@ -45,7 +45,7 @@ sudo ninja install
 cd ~
 git clone https://github.com/open-quantum-safe/oqs-provider.git --branch 0.10.0
 cd oqs-provider
-cmake -S . -B _build && cmake --build _build && cmake --install _build
+cmake -S . -B _build && cmake --build _build && sudo cmake --install _build
 # Install OQS-bind
 cd ~
 git clone https://github.com/mr-torgue/OQS-bind.git --branch v1.2.1
@@ -55,15 +55,15 @@ autoreconf -fi
 CFLAGS="$CFLAGS -O0 -g" ./configure
 make
 sudo make install
-mkdir /usr/local/etc/bind
-mkdir /usr/local/etc/bind/zones
-mkdir /var/cache/bind
-mkdir -p /usr/local/etc/bind/root/hints/
-ldconfig 
+sudo mkdir /usr/local/etc/bind
+sudo mkdir /usr/local/etc/bind/zones
+sudo mkdir /var/cache/bind
+sudo mkdir -p /usr/local/etc/bind/root/hints/
+sudo ldconfig 
 
 # install monitoring if specified
 if [ "$INSTALL_MONITORING" = true ]; then
-sudo apt install prometheus prometheus-node-exporter prometheus-bind-exporter
+sudo apt install prometheus prometheus-node-exporter prometheus-bind-exporter -y
 sudo systemctl enable prometheus
 sudo systemctl start prometheus
 sudo systemctl start node_exporter
@@ -75,5 +75,5 @@ sudo mkdir -p /etc/apt/keyrings/
 wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
 echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 sudo apt-get update
-sudo apt-get install grafana
+sudo apt-get install grafana -y
 fi
