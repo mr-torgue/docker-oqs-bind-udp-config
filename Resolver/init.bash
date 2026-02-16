@@ -62,4 +62,3 @@ install_trust_anchor
 cat /usr/local/etc/named.conf
 ifconfig 
 sha256sum /dsset-.
-/bin/bash
