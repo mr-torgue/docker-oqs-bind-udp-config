@@ -9,9 +9,9 @@ while getopts "m" opt; do
   esac
 done
 
-apt update
-apt upgrade -y
-apt install valgrind nano gdb tcpdump ssh curl cmake gcc pkg-config autoconf automake git build-essential ninja-build libnghttp2-dev libcap-dev libtool libtool-bin libuv1-dev unzip iputils-ping iptables iproute2 liburcu-dev libnetfilter-queue-dev libpcap-dev net-tools netcat traceroute iperf libnl-3-dev libnl-genl-3-dev binutils-dev libreadline6-dev libjemalloc-dev libcmocka-dev libxml2-dev libjson-c-dev binutils -y
+sudo apt update
+sudo apt upgrade -y
+sudo apt install valgrind nano gdb tcpdump ssh curl cmake gcc pkg-config autoconf automake git build-essential ninja-build libnghttp2-dev libcap-dev libtool libtool-bin libuv1-dev unzip iputils-ping iptables iproute2 liburcu-dev libnetfilter-queue-dev libpcap-dev net-tools netcat traceroute iperf libnl-3-dev libnl-genl-3-dev binutils-dev libreadline6-dev libjemalloc-dev libcmocka-dev libxml2-dev libjson-c-dev binutils -y
 # Remove resolver and set 8.8.8.8 and 8.8.4.4 to ensure that we can still use DNS
 sudo systemctl stop systemd-resolved
 sudo systemctl disable systemd-resolved
@@ -27,7 +27,7 @@ rm openssl-3.2.5.tar.gz
 cd openssl-3.2.5
 ./Configure
 make
-make install
+sudo make install
 sed -i 's/default = default_sect/default = default_sect\noqsprovider = oqsprovider_sect/' /usr/local/ssl/openssl.cnf
 echo -e "[oqsprovider_sect]\nactivate = 1" >> /usr/local/ssl/openssl.cnf
 echo "/usr/local/lib64" > /etc/ld.so.conf.d/openssl.conf
@@ -40,7 +40,7 @@ mkdir liboqs/build
 cd liboqs/build
 cmake -GNinja -DBUILD_SHARED_LIBS=ON ..
 ninja -j 1
-ninja install
+sudo ninja install
 # Install oqs-provider 0.10.0
 cd ~
 git clone https://github.com/open-quantum-safe/oqs-provider.git --branch 0.10.0
@@ -54,7 +54,7 @@ autoreconf -fi
 # For debugging: remove in production
 CFLAGS="$CFLAGS -O0 -g" ./configure
 make
-make install
+sudo make install
 mkdir /usr/local/etc/bind
 mkdir /usr/local/etc/bind/zones
 mkdir /var/cache/bind
