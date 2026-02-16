@@ -32,11 +32,11 @@ dnssec-keygen -a $ALG -n ZONE -f KSK local
 cd "$ORIGINAL_DIR"
 
 # add DS record from example.local.
-if [[ ! -f /dsset-example.local. ]]; then
+if [[ ! -f dsset-example.local. ]]; then
     echo "Could not find DS record dsset-example.local.!"
     exit 1
 fi
-DSREC=$(cat /dsset-example.local.)
+DSREC=$(cat dsset-example.local.)
 egrep "$(echo -n $DSREC)" "/usr/local/etc/bind/zones/db.local" > /dev/null
 if [[ $? != 0 ]]
 then
@@ -46,7 +46,7 @@ fi
 # sign the zone and export DS record
 cd /usr/local/etc/bind/zones/
 dnssec-signzone -o local -N INCREMENT -t -S -K /usr/local/etc/bind/zones db.local
-cp /usr/local/etc/bind/zones/dsset-local. /tmp/
+cd "$ORIGINAL_DIR"
 
 # print some info
 cat /usr/local/etc/named.conf

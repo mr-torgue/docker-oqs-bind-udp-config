@@ -33,11 +33,10 @@ rm -rf *.key
 rm -rf *.private
 dnssec-keygen -a $ALG -n ZONE example.local
 dnssec-keygen -a $ALG -n ZONE -f KSK example.local
-cd "$ORIGINAL_DIR"
 
 # sign the zone and export DS record
 dnssec-signzone -o example.local -N INCREMENT -t -S -K /usr/local/etc/bind/zones db.example.local
-cp /usr/local/etc/bind/zones/dsset-example.local. /tmp/
+cd "$ORIGINAL_DIR"
 
 # print some info
 cat /usr/local/etc/named.conf

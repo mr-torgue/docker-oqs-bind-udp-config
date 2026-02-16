@@ -46,7 +46,7 @@ fi
 # sign the zone and export DS record
 cd /usr/local/etc/bind/zones
 dnssec-signzone -o . -N INCREMENT -t -S -K /usr/local/etc/bind/zones db.root;  
-cp /usr/local/etc/bind/zones/dsset-. /tmp/
+cd "$ORIGINAL_DIR"
 
 # print some info
 cat /usr/local/etc/named.conf
