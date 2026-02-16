@@ -80,3 +80,6 @@ sudo /bin/systemctl daemon-reload
 sudo /bin/systemctl enable grafana-server
 sudo /bin/systemctl start grafana-server
 fi
+
+# Clone the git repositories
+git clone https://github.com/mr-torgue/docker-oqs-bind-udp-config.git
