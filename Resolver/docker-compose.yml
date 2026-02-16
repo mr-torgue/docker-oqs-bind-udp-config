@@ -15,11 +15,4 @@ services:
             - ./${DB}:/root.hints
             - ./data:/tmp/
             - ./dsset-.:/dsset-.
-        ports:
-            - "53:53/tcp"
-            - "53:53/udp"
-            - "53:8053/tcp"
-            - "53:8053/udp"
-        cap_add:
-            - NET_ADMIN
         network_mode: host

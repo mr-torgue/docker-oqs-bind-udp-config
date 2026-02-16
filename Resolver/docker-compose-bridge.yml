@@ -1,18 +1,31 @@
 services:
-    ns_example_local:
+    resolver:
         build:
             context: ..
         image: oqs-bind
         tty: true
         entrypoint:
             - /init.bash 
-        command: ${ALG}
         volumes:
             - ./init.bash:/init.bash
             - ../docker scripts/run_bind.bash:/run_bind.bash
             - ../docker scripts/set_udp_fragmentation.bash:/set_udp_fragmentation.bash
             - ../docker scripts/update_bind.bash:/update_bind.bash
             - ./named.conf:/named.conf
-            - ./${DB}:/db.example.local
+            - ./${DB}:/root.hints
             - ./data:/tmp/
-        network_mode: host
+            - ./dsset-.:/dsset-.
+        ports:
+            - "53:53/tcp"
+            - "53:53/udp"
+            - "8053:8053/tcp"
+            - "8053:8053/udp"
+        cap_add:
+            - NET_ADMIN
+        networks:
+            bind9_net:
+                ipv4_address: 172.20.0.5
+
+networks:
+    bind9_net:
+        external: true

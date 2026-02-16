@@ -45,7 +45,10 @@ echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf > /dev/null
 
 # Build the image and configure docker
 cd docker-oqs-bind-udp-config
-sudo docker build -t oqs-bind .
+dockerd-rootless-setuptool.sh install
+sudo setcap cap_net_bind_service=ep /usr/bin/rootlesskit
+docker build -t oqs-bind .
+docker network create --subnet=172.20.0.0/16 bind9_net
 
 # install monitoring if specified
 if [ "$INSTALL_MONITORING" = true ]; then

@@ -1,5 +1,5 @@
 services:
-    ns_example_local:
+    ns_root:
         build:
             context: ..
         image: oqs-bind
@@ -13,6 +13,20 @@ services:
             - ../docker scripts/set_udp_fragmentation.bash:/set_udp_fragmentation.bash
             - ../docker scripts/update_bind.bash:/update_bind.bash
             - ./named.conf:/named.conf
-            - ./${DB}:/db.example.local
+            - ./${DB}:/db.root
             - ./data:/tmp/
-        network_mode: host
+            - ./dsset-local.:/dsset-local.
+        ports:
+            - "53:53/tcp"
+            - "53:53/udp"
+            - "8053:8053/tcp"
+            - "8053:8053/udp"
+        cap_add:
+            - NET_ADMIN
+        networks:
+            bind9_net:
+                ipv4_address: 172.20.0.2
+
+networks:
+    bind9_net:
+        external: true

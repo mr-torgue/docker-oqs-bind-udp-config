@@ -16,11 +16,4 @@ services:
             - ./${DB}:/db.root
             - ./data:/tmp/
             - ./dsset-local.:/dsset-local.
-        ports:
-            - "53:53/tcp"
-            - "53:53/udp"
-            - "8053:8053/tcp"
-            - "8053:8053/udp"
-        cap_add:
-            - NET_ADMIN
         network_mode: host
