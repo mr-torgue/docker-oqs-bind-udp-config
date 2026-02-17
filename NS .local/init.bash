@@ -54,4 +54,4 @@ ifconfig
 cat /usr/local/etc/bind/zones/db.local
 cat /usr/local/etc/bind/zones/dsset-local.
 sha256sum /usr/local/etc/bind/zones/dsset-local.
-sha256sum /dsset-example.local. 
+sha256sum dsset-example.local. 
