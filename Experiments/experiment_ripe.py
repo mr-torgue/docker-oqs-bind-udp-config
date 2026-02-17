@@ -230,7 +230,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             print("Waiting for 5 seconds for results to come in...")
             sleep(5) # not great but should work
             (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
-            if df_measurements != None and df_results != None:
+            if df_measurements is not None and df_results is not None:
                 timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
                 csv = df_measurements.to_csv(index=False)
                 save_to_csv(csv, timestamp, label, strategy, algorithm)
