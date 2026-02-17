@@ -226,9 +226,9 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         ids = response["measurements"]
         print("Success! Saving %d ids %s to CSV!" % (len(ids), ids))
         counter = 0
-        while True and counter < 20:
-            print("Waiting for 5 seconds for results to come in...")
-            sleep(5) # not great but should work
+        while True and counter < 12:
+            print("Waiting for 10 seconds for results to come in...")
+            sleep(10) # not great but should work
             (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
             if df_measurements is not None and df_results is not None:
                 timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")

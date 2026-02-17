@@ -55,7 +55,6 @@ read -p "do you want to run bind with these settings? (Y/N): " choice
 if [[ "$choice" =~ ^[Yy]$ ]]; then
     pkill named
     pkill tcpdump
-    cd /tmp
     if [ "$DEBUG" = "true" ]; then
         echo "DEBUG MODE"
         tcpdump -i any 'port 53 and (udp or tcp)' -w capture.pcap &
