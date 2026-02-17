@@ -58,7 +58,7 @@ if [[ "$choice" =~ ^[Yy]$ ]]; then
     cd /tmp
     if [ "$DEBUG" = "true" ]; then
         echo "DEBUG MODE"
-        tcpdump -i any -w /tmp/$ALG-ns-root.pcap &
+        tcpdump -i any 'port 53 and (udp or tcp)' -w /tmp/$ALG-ns-root.pcap &
         gdb --batch -ex "run" -ex "bt" -ex "quit" --args named -g -d 10
     else
         named -d 3
