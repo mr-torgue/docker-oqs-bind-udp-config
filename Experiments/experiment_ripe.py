@@ -175,14 +175,15 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             type="area",
             value="WW",
             requested=nr_sources,
-            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
+            # tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2", "system-v1"]}
         )
     else:
         source = AtlasSource(
             type="country",
             value=country,
             requested=nr_sources,
-            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2", "system-v1"]}
         )
     prefix, suffix = domain.split(".", 1)
     measurements=[]
@@ -233,7 +234,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             if df_measurements is not None and df_results is not None:
                 timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
                 csv = df_measurements.to_csv(index=False)
-                save_to_csv(csv, timestamp, label, strategy, algorithm)
+                save_to_csv(csv, timestamp, "measurements-%s" % label, strategy, algorithm)
                 csv = df_results.to_csv(index=False)
                 save_to_csv(csv, timestamp, label, strategy, algorithm)
                 break
