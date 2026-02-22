@@ -46,7 +46,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
             type="area",
             value="WW",
             requested=nr_sources,
-            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2", "system-v1"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2"]}
         )
     else:
         print("Using %d random probes from country %s" % (nr_sources, country))
@@ -54,7 +54,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
             type="country",
             value=country,
             requested=nr_sources,
-            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2", "system-v1"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2"]}
         )
     measurement = Dns(
         af=4,
@@ -176,14 +176,14 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             value="WW",
             requested=nr_sources,
             # tags={"include":["system-ipv4-works", "system-ipv4-stable-30d"], "exclude": ["system-v2", "system-v1"]}
-            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2", "system-v1"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2"]}
         )
     else:
         source = AtlasSource(
             type="country",
             value=country,
             requested=nr_sources,
-            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2", "system-v1"]}
+            tags={"include":["system-ipv4-works", "system-ipv4-stable-30d", "system-v2"]}
         )
     prefix, suffix = domain.split(".", 1)
     measurements=[]
