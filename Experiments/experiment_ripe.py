@@ -161,7 +161,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
     if len(probes) > 0:
         source = AtlasSource(
             type="probes",
-            value=",".join(probes),
+            value=",".join(map(str, probes)),
             requested=len(probes)
         )
     elif reuse_probes_msm_id > 0:
