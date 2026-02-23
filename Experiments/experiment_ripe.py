@@ -81,7 +81,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
         print("Success! Collecting results for %s!" % (ids))
         counter = 0 
         # add counter to prevent loops
-        while True and counter < 20:
+        while True and counter < 32:
             print("No results, waiting for 5 seconds...")
             sleep(5)
             (df_measurements, df_results) = get_results_with_metadata(ids, label, algorithm, strategy)
@@ -135,9 +135,9 @@ def run_experiment_wait(nr_sources, nr_queries, resolver, domain, description, l
             (df_measurements, df_results, ids) = run_measurement(delta, resolver, newdomain, description, label, algorithm, strategy, country, reuse_msm_id, sel_probes)
             if df_measurements is None or df_results is None:
                 print("dataframes should not be empty")
-                return
-            dfs_measurements.append(df_measurements)
-            dfs_results.append(df_results)
+            else:
+                dfs_measurements.append(df_measurements)
+                dfs_results.append(df_results)
     # combine all the dataframes and write it to a CSV file
     timestamp = pd.Timestamp.now().strftime("%Y-%m-%d_%H-%M-%S")
     # save measurements
