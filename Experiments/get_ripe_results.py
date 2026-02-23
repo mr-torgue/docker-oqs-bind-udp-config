@@ -142,15 +142,15 @@ def get_measurements_with_metadata(ids, label):
     url_path = "/api/v2/measurements"
     request = AtlasRequest(**{"url_path": url_path})
     (is_success, response) = request.get(**kwargs)
-    results = response["results"]
-    print("Found %d results for ids %s" % (response["count"], ids))
-    if results == []:
-        print("No results for ids %s!" % (ids))
-        return None
-    elif len(ids) != response["count"]:
-        print("len(ids) (%d) != response[\"count\"] (%d)" % (len(ids), response["count"]))
-        return None
-    elif is_success:
+    if is_success:
+        results = response["results"]
+        if results == []:
+            print("No results for ids %s!" % (ids))
+            return None
+        elif len(ids) != response["count"]:
+            print("len(ids) (%d) != response[\"count\"] (%d)" % (len(ids), response["count"]))
+            return None
+        print("Found %d results for ids %s" % (response["count"], ids))
         df = pd.DataFrame(pd.json_normalize(results))
         df = df.assign(label="%s" % (label))
         return df
