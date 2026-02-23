@@ -95,10 +95,10 @@ def boxplots(df):
 
     # Customize the plot
     plt.title('Sequence of Boxplots by Group', fontsize=20, fontweight='bold')
-    plt.xlabel('Group', fontsize=16, fontweight='bold')
-    plt.ylabel('ms', fontsize=16, fontweight='bold')
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.xlabel('Group', fontsize=18, fontweight='bold')
+    plt.ylabel('ms', fontsize=18, fontweight='bold')
+    plt.xticks(fontsize=14, fontweight='bold')
+    plt.yticks(fontsize=14, fontweight='bold')
 
     # Save the plot to file
     plt.savefig('boxplot.png', dpi=300, bbox_inches='tight')
