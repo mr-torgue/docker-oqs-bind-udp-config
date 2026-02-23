@@ -94,9 +94,9 @@ def boxplots(df):
     sns.boxplot(x='group', y='Query Time', data=df, palette='Set2', native_scale=True)
 
     # Customize the plot
-    plt.title('Sequence of Boxplots by Group', fontsize=24)
-    plt.xlabel('Group', fontsize=20)
-    plt.ylabel('ms', fontsize=20)
+    plt.title('Sequence of Boxplots by Group', fontsize=24, fontweight='bold')
+    plt.xlabel('Group', fontsize=20, fontweight='bold')
+    plt.ylabel('ms', fontsize=20, fontweight='bold')
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
 
