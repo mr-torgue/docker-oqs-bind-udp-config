@@ -66,7 +66,7 @@ def run_measurement(nr_sources, resolver, domain, description, label, algorithm,
         use_probe_resolver=False,
         set_rd_bit=True,
         set_nsid_bit=True,
-        udp_payload_size=1232,
+        udp_payload_size=512,
     )
     # send request
     atlas_request = AtlasCreateRequest(
@@ -198,7 +198,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
         use_probe_resolver=False,
         set_rd_bit=True,
         set_nsid_bit=True,
-        udp_payload_size=1232,
+        udp_payload_size=512,
     ))
     for i in range(nr_queries):
         newdomain = "%s%d.%s" % (prefix, i, suffix)
@@ -212,7 +212,7 @@ def run_experiment(nr_sources, nr_queries, resolver, domain, description, label,
             use_probe_resolver=False,
             set_rd_bit=True,
             set_nsid_bit=True,
-            udp_payload_size=1232,
+            udp_payload_size=512,
         ))
 
     atlas_request = AtlasCreateRequest(
