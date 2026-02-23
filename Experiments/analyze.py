@@ -88,7 +88,7 @@ def boxplots(df):
     sns.set(style="whitegrid")
 
     # Create the figure and axis
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(20, 12))
 
     # Generate boxplots
     sns.boxplot(x='group', y='Query Time', data=df, palette='Set2', native_scale=True)
@@ -97,12 +97,8 @@ def boxplots(df):
     plt.title('Sequence of Boxplots by Group', fontsize=20, fontweight='bold')
     plt.xlabel('Group', fontsize=16, fontweight='bold')
     plt.ylabel('ms', fontsize=16, fontweight='bold')
+    plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-
-    # Create legend with shorter labels
-    handles, labels = plt.gca().get_legend_handles_labels()
-    new_labels = [label.split('-')[-1] for label in labels]  # Use only the last part of the group name
-    plt.legend(handles, new_labels, title='Algorithm', bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # Save the plot to file
     plt.savefig('boxplot.png', dpi=300, bbox_inches='tight')
