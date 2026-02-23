@@ -100,6 +100,9 @@ def boxplots(df):
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
 
+    # Save the plot to file
+    plt.savefig('boxplot.png', dpi=300, bbox_inches='tight')
+
     # Show the plot
     plt.show()
 
